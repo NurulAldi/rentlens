@@ -109,14 +109,11 @@ class _ProfilePageState extends State<ProfilePage> {
                 children: [
                   _infoRow(
                     'Terverifikasi',
-                    Row(
-                      children: [
-                        Image.asset(
-                          'assets/images/verified.png',
-                          width: 18,
-                          height: 18,
-                        ),
-                      ],
+
+                    Image.asset(
+                      'assets/images/verified.png',
+                      width: 18,
+                      height: 18,
                     ),
                   ),
                   const SizedBox(height: 12),
