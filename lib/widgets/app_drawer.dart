@@ -25,7 +25,11 @@ class AppDrawer extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
         onTap: () {
           Navigator.pop(context);
-          onMenuTap(menu);
+          if (isLogout) {
+            Navigator.pushNamedAndRemoveUntil(context, '/login', (_) => false);
+          } else {
+            onMenuTap(menu);
+          }
         },
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
