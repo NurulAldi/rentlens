@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../models/product.dart';
 import 'pemilik_drawer.dart';
+import 'product_form_page.dart';
 
 class PemilikProdukPage extends StatefulWidget {
   const PemilikProdukPage({super.key});
@@ -193,7 +194,18 @@ class _PemilikProdukPageState extends State<PemilikProdukPage> {
           children: [
             _ActionBar(
               kategori: _kategori,
-              onTambah: () {},
+              onTambah: () async {
+                // Navigate to Add mode
+                final result = await Navigator.push<Product>(
+                  context,
+                  MaterialPageRoute(builder: (_) => const ProductFormPage()),
+                );
+                if (result != null) {
+                  setState(() {
+                    _tersedia.add(result);
+                  });
+                }
+              },
               onKategoriChanged: (val) => setState(() => _kategori = val),
               onPilihSemua: () => _togglePilihSemua(!_pilihSemua),
             ),
@@ -209,6 +221,20 @@ class _PemilikProdukPageState extends State<PemilikProdukPage> {
               disabled: false,
               onChecked: (id, val) => setState(() => _checked[id] = val),
               onHapus: _onHapusProduk,
+              onEdit: (p) async {
+                final edited = await Navigator.push<Product>(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ProductFormPage(initialProduct: p),
+                  ),
+                );
+                if (edited != null) {
+                  setState(() {
+                    final idx = _tersedia.indexWhere((e) => e.id == edited.id);
+                    if (idx != -1) _tersedia[idx] = edited;
+                  });
+                }
+              },
             ),
             const SizedBox(height: 20),
             const Text(
@@ -222,6 +248,7 @@ class _PemilikProdukPageState extends State<PemilikProdukPage> {
               disabled: true,
               onChecked: (id, val) => setState(() => _checked[id] = val),
               onHapus: _onHapusProduk,
+              onEdit: (_) {},
             ),
           ],
         ),
@@ -322,12 +349,14 @@ class _ProdukList extends StatelessWidget {
   final bool disabled;
   final void Function(String, bool) onChecked;
   final void Function(Product) onHapus;
+  final void Function(Product) onEdit;
   const _ProdukList({
     required this.items,
     required this.checked,
     required this.disabled,
     required this.onChecked,
     required this.onHapus,
+    required this.onEdit,
   });
 
   @override
@@ -383,7 +412,7 @@ class _ProdukList extends StatelessWidget {
                   ),
                 ),
                 IconButton(
-                  onPressed: disabled ? null : () {},
+                  onPressed: disabled ? null : () => onEdit(p),
                   icon: SvgPicture.asset(
                     'assets/images/edit.svg',
                     width: 20,
