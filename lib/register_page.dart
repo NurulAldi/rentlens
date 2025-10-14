@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'models/user.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -6,6 +7,22 @@ class RegisterPage extends StatefulWidget {
   @override
   State<RegisterPage> createState() => _RegisterPageState();
 }
+
+// Simulasi database user sederhana (global agar bisa diakses dari file lain)
+final List<User> users = [
+  User(
+    username: 'peminjam1',
+    email: 'peminjam1@email.com',
+    password: 'password123',
+    role: 'Peminjam',
+  ),
+  User(
+    username: 'pemilik1',
+    email: 'pemilik1@email.com',
+    password: 'password123',
+    role: 'Pemilik',
+  ),
+];
 
 class _RegisterPageState extends State<RegisterPage> {
   bool isBorrower = true; // true = Peminjam, false = Pemilik
@@ -21,6 +38,35 @@ class _RegisterPageState extends State<RegisterPage> {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  void _register() {
+    final username = _usernameController.text.trim();
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+    final role = isBorrower ? 'Peminjam' : 'Pemilik';
+
+    if (username.isEmpty || email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Semua field harus diisi!')));
+      return;
+    }
+
+    // Simpan user baru ke "database"
+    users.add(
+      User(username: username, email: email, password: password, role: role),
+    );
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('Akun $role berhasil dibuat!')));
+    _usernameController.clear();
+    _emailController.clear();
+    _passwordController.clear();
+    setState(() {
+      isBorrower = true;
+    });
   }
 
   @override
@@ -94,14 +140,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                 ),
                 const SizedBox(height: 24),
-                _PrimaryButton(
-                  label: 'Daftar',
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Register tapped')),
-                    );
-                  },
-                ),
+                _PrimaryButton(label: 'Daftar', onPressed: _register),
                 const SizedBox(height: 16),
                 _BottomLink(
                   text: 'Sudah punya akun?',

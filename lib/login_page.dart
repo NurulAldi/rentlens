@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'models/user.dart';
+import 'register_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -19,6 +21,31 @@ class _LoginPageState extends State<LoginPage> {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  void _login() {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+    final role = isBorrower ? 'Peminjam' : 'Pemilik';
+
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Email dan password wajib diisi!')),
+      );
+      return;
+    }
+
+    // Cari user yang cocok
+    try {
+      users.firstWhere(
+        (u) => u.email == email && u.password == password && u.role == role,
+      );
+      Navigator.pushReplacementNamed(context, '/home');
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Email, password, atau role salah!')),
+      );
+    }
   }
 
   @override
@@ -87,13 +114,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
                 const SizedBox(height: 24),
-                _PrimaryButton(
-                  label: 'Login',
-                  onPressed: () {
-                    // Langsung login dengan kredensial apapun
-                    Navigator.pushReplacementNamed(context, '/home');
-                  },
-                ),
+                _PrimaryButton(label: 'Login', onPressed: _login),
                 const SizedBox(height: 16),
                 _BottomLink(
                   text: 'Belum punya akun?',
