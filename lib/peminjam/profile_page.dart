@@ -1,6 +1,10 @@
+// Pindahan dari lib/profile_page.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'widgets/app_drawer.dart';
+import '../widgets/app_drawer.dart';
+
+// ...existing code from original profile_page.dart...
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});

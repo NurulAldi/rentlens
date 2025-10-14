@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'models/product.dart';
-import 'product_detail_page.dart';
-import 'widgets/app_drawer.dart';
+import '../models/product.dart';
+import '../peminjam/product_detail_page.dart';
+import '../widgets/app_drawer.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

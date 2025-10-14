@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'login_page.dart';
 import 'register_page.dart';
 import 'splash_page.dart';
-import 'home_page.dart';
-import 'notification_page.dart';
-import 'profile_page.dart';
+import 'peminjam/home_page.dart';
+import 'peminjam/notification_page.dart';
+import 'peminjam/profile_page.dart';
 
 void main() {
   runApp(const MyApp());

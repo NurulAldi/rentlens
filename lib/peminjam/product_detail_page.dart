@@ -1,6 +1,10 @@
+// Pindahan dari lib/product_detail_page.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'models/product.dart';
+import '../models/product.dart';
+
+// ...existing code from original product_detail_page.dart...
 
 class ProductDetailPage extends StatefulWidget {
   const ProductDetailPage({super.key, required this.product});
