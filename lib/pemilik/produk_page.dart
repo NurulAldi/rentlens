@@ -148,7 +148,7 @@ class _PemilikProdukPageState extends State<PemilikProdukPage> {
           setState(() => _activeMenu = m);
           switch (m) {
             case PemilikDrawerMenu.dashboard:
-              // TODO: navigate to dashboard when implemented
+              Navigator.pushReplacementNamed(context, '/pemilik/dashboard');
               break;
             case PemilikDrawerMenu.produk:
               // already here
@@ -272,71 +272,87 @@ class _ActionBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        ElevatedButton.icon(
-          onPressed: onTambah,
-          icon: SvgPicture.asset(
-            'assets/images/Add-produk.svg',
-            width: 18,
-            height: 18,
-          ),
-          label: const Text('Tambah Produk'),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF5C62F6),
-            foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
+        SizedBox(
+          height: 40,
+          child: ElevatedButton.icon(
+            onPressed: onTambah,
+            icon: SvgPicture.asset(
+              'assets/images/Add-produk.svg',
+              width: 18,
+              height: 18,
+            ),
+            label: const Text('Tambah Produk'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF5C62F6),
+              foregroundColor: Colors.black,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              textStyle: const TextStyle(fontSize: 14),
+              minimumSize: const Size(0, 40),
+              maximumSize: const Size(double.infinity, 40),
             ),
           ),
         ),
         const SizedBox(width: 10),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          decoration: BoxDecoration(
-            color: const Color(0xFF5C62F6),
-            borderRadius: BorderRadius.circular(8),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x1A000000),
-                blurRadius: 8,
-                offset: Offset(0, 4),
+        SizedBox(
+          height: 40,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: const Color(0xFF5C62F6),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  value: kategori,
+                  icon: SvgPicture.asset(
+                    'assets/images/dropdown-down.svg',
+                    width: 8,
+                    height: 8,
+                  ),
+                  dropdownColor: Colors.white,
+                  style: const TextStyle(color: Colors.black, fontSize: 14),
+                  isDense: true,
+                  alignment: Alignment.centerLeft,
+                  borderRadius: BorderRadius.circular(8),
+                  underline: const SizedBox(),
+                  items: const [
+                    DropdownMenuItem(value: 'Semua', child: Text('Semua')),
+                    DropdownMenuItem(value: 'Kamera', child: Text('Kamera')),
+                    DropdownMenuItem(value: 'Lensa', child: Text('Lensa')),
+                    DropdownMenuItem(value: 'Tripod', child: Text('Tripod')),
+                  ],
+                  onChanged: (v) {
+                    if (v != null) onKategoriChanged(v);
+                  },
+                ),
               ),
-            ],
-          ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              value: kategori,
-              icon: SvgPicture.asset(
-                'assets/images/dropdown.svg',
-                width: 14,
-                height: 14,
-                color: Colors.white,
-              ),
-              dropdownColor: Colors.white,
-              style: const TextStyle(color: Colors.white),
-              items: const [
-                DropdownMenuItem(value: 'Semua', child: Text('Kategori')),
-                DropdownMenuItem(value: 'Kamera', child: Text('Kamera')),
-                DropdownMenuItem(value: 'Lensa', child: Text('Lensa')),
-                DropdownMenuItem(value: 'Tripod', child: Text('Tripod')),
-              ],
-              onChanged: (v) {
-                if (v != null) onKategoriChanged(v);
-              },
             ),
           ),
         ),
         const SizedBox(width: 10),
-        ElevatedButton(
-          onPressed: onPilihSemua,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF5C62F6),
-            foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
+        SizedBox(
+          height: 40,
+          child: ElevatedButton(
+            onPressed: onPilihSemua,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF5C62F6),
+              foregroundColor: Colors.black,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              textStyle: const TextStyle(fontSize: 14),
+              minimumSize: const Size(0, 40),
+              maximumSize: const Size(double.infinity, 40),
             ),
+            child: const Text('Pilih Semua'),
           ),
-          child: const Text('Pilih Semua'),
         ),
       ],
     );
