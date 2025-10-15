@@ -1,16 +1,50 @@
 import 'package:flutter/foundation.dart';
+import '../models/session.dart';
 
 class ProfileProvider extends ChangeNotifier {
-  String _name = 'Mas Amba';
-  String _bio = 'Maniak pengoleksi kamera yang sudah ditandatangani bahill';
-  String? _imageAsset = 'assets/images/profile_image2.jpeg';
+  String _name = '';
+  String _bio = '';
+  String? _imageAsset;
   String? _imagePath;
+  DateTime? _joinDate;
+  bool _isVerified = true;
+
+  ProfileProvider() {
+    _loadFromSession();
+  }
 
   // Getters
   String get name => _name;
   String get bio => _bio;
   String? get imageAsset => _imageAsset;
   String? get imagePath => _imagePath;
+  DateTime? get joinDate => _joinDate;
+  bool get isVerified => _isVerified;
+
+  // Load data dari Session
+  void _loadFromSession() {
+    final user = Session.currentUser;
+    if (user == null) return;
+
+    // Untuk akun pemilik1, gunakan nama "Mas Amba" (data hardcode)
+    if (user.username.toLowerCase() == 'pemilik1') {
+      _name = 'Mas Amba';
+    } else {
+      // Untuk akun baru, gunakan username sebagai nama
+      _name = user.username;
+    }
+
+    _bio = user.bio ?? '';
+    _imageAsset = user.profileImage;
+    _joinDate = user.joinDate;
+    _isVerified = user.isVerified;
+    notifyListeners();
+  }
+
+  // Reload data dari session (dipanggil setelah login)
+  void reloadFromSession() {
+    _loadFromSession();
+  }
 
   // Update profile
   void updateProfile({
@@ -33,12 +67,8 @@ class ProfileProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Reset to default
+  // Reset to session data
   void reset() {
-    _name = 'Mas Amba';
-    _bio = 'Maniak pengoleksi kamera yang sudah ditandatangani bahill';
-    _imageAsset = 'assets/images/profile_image2.jpeg';
-    _imagePath = null;
-    notifyListeners();
+    _loadFromSession();
   }
 }

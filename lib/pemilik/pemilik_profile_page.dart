@@ -45,6 +45,24 @@ class _PemilikProfilePageState extends State<PemilikProfilePage>
     super.dispose();
   }
 
+  String _formatDate(DateTime date) {
+    final months = [
+      'Januari',
+      'Februari',
+      'Maret',
+      'April',
+      'Mei',
+      'Juni',
+      'Juli',
+      'Agustus',
+      'September',
+      'Oktober',
+      'November',
+      'Desember',
+    ];
+    return '${date.day} ${months[date.month - 1]} ${date.year}';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<ProfileProvider>(
@@ -150,12 +168,24 @@ class _PemilikProfilePageState extends State<PemilikProfilePage>
                           : null,
                     ),
                     const SizedBox(width: 12),
-                    Text(
-                      profileProvider.name,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                      ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          profileProvider.name,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          profileProvider.joinDate != null
+                              ? 'Tanggal Bergabung: ${_formatDate(profileProvider.joinDate!)}'
+                              : 'Tanggal Bergabung: -',
+                          style: const TextStyle(color: Colors.black54),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -176,11 +206,19 @@ class _PemilikProfilePageState extends State<PemilikProfilePage>
                         ),
                       ),
                       const SizedBox(height: 12),
-                      _infoRow('Badge', const Text('Pemilik Aktif')),
-                      const SizedBox(height: 12),
                       _infoRow(
                         'Bio',
-                        Text(profileProvider.bio, textAlign: TextAlign.right),
+                        Text(
+                          profileProvider.bio.isEmpty
+                              ? '-'
+                              : profileProvider.bio,
+                          textAlign: TextAlign.right,
+                          style: TextStyle(
+                            color: profileProvider.bio.isEmpty
+                                ? Colors.grey
+                                : Colors.black,
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -319,13 +357,21 @@ Widget _infoRow(String label, Widget value) {
 class _StatsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    // Cek apakah ini akun testing (pemilik1) atau akun baru
+    final currentUser = Session.currentUser;
+    final isTestAccount = currentUser?.username.toLowerCase() == 'pemilik1';
+
     Widget cell(String big, String small) {
       return Expanded(
         child: Column(
           children: [
             Text(
               big,
-              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 20),
+              style: TextStyle(
+                fontWeight: FontWeight.w700,
+                fontSize: 20,
+                color: isTestAccount ? Colors.black : Colors.grey,
+              ),
             ),
             const SizedBox(height: 4),
             Text(
@@ -352,9 +398,9 @@ class _StatsCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       child: Row(
         children: [
-          cell('99%', 'Review Positif'),
-          cell('30rb x', 'Produk Dipinjam'),
-          cell('1rb +', 'Total Ulasan'),
+          cell(isTestAccount ? '99%' : '-', 'Review Positif'),
+          cell(isTestAccount ? '30rb x' : '-', 'Produk Dipinjam'),
+          cell(isTestAccount ? '1rb +' : '-', 'Total Ulasan'),
         ],
       ),
     );
@@ -421,7 +467,7 @@ class _StoreTab extends StatelessWidget {
               builder: (context, productProvider, child) {
                 // Filter produk berdasarkan kategori dan owner
                 final ownerProducts = productProvider.getProductsByOwner(
-                  'Mas Amba',
+                  Session.username,
                 );
                 final filteredProducts = selectedIndex == 0
                     ? ownerProducts
@@ -434,7 +480,35 @@ class _StoreTab extends StatelessWidget {
                           .toList();
 
                 if (filteredProducts.isEmpty) {
-                  return const Center(child: Text('Tidak ada produk'));
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.inventory_2_outlined,
+                          size: 64,
+                          color: Colors.grey.shade400,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Belum ada produk',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey.shade600,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Tambahkan produk pertama Anda',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey.shade500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
                 }
 
                 return GridView.builder(
@@ -552,6 +626,41 @@ class _ReviewsTab extends StatelessWidget {
   const _ReviewsTab();
   @override
   Widget build(BuildContext context) {
+    // Cek apakah ini akun testing (pemilik1) atau akun baru
+    final currentUser = Session.currentUser;
+    final isTestAccount = currentUser?.username.toLowerCase() == 'pemilik1';
+
+    if (!isTestAccount) {
+      // Tampilkan placeholder untuk akun baru
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.rate_review_outlined,
+              size: 64,
+              color: Colors.grey.shade400,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Belum ada ulasan',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey.shade600,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Ulasan akan muncul setelah produk disewa',
+              style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Tampilkan data dummy untuk akun testing
     return ListView.separated(
       padding: const EdgeInsets.all(12),
       itemCount: 6,

@@ -1,19 +1,40 @@
 import 'package:flutter/foundation.dart';
 import '../models/product.dart';
+import '../models/session.dart';
 
 class ProductProvider extends ChangeNotifier {
   final List<Product> _products = [];
 
-  // Getter untuk mendapatkan semua produk
-  List<Product> get products => List.unmodifiable(_products);
+  // Getter untuk mendapatkan semua produk milik user yang sedang login
+  List<Product> get products {
+    if (Session.username == 'pemilik1') {
+      return List.unmodifiable(_products);
+    }
+    // For new users, filter only their products
+    return List.unmodifiable(
+      _products.where((p) => p.owner == Session.username).toList(),
+    );
+  }
 
-  // Getter untuk produk tersedia (tidak dibooking)
-  List<Product> get availableProducts =>
-      _products.where((p) => !p.isBooked).toList();
+  // Getter untuk produk tersedia (tidak dibooking) milik user
+  List<Product> get availableProducts {
+    if (Session.username == 'pemilik1') {
+      return _products.where((p) => !p.isBooked).toList();
+    }
+    return _products
+        .where((p) => !p.isBooked && p.owner == Session.username)
+        .toList();
+  }
 
-  // Getter untuk produk yang dibooking
-  List<Product> get bookedProducts =>
-      _products.where((p) => p.isBooked).toList();
+  // Getter untuk produk yang dibooking milik user
+  List<Product> get bookedProducts {
+    if (Session.username == 'pemilik1') {
+      return _products.where((p) => p.isBooked).toList();
+    }
+    return _products
+        .where((p) => p.isBooked && p.owner == Session.username)
+        .toList();
+  }
 
   // Filter produk berdasarkan kategori
   List<Product> getProductsByCategory(String category) {

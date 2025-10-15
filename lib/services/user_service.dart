@@ -8,17 +8,26 @@ class UserService {
 
   // Simulasi database user (dalam aplikasi nyata, gunakan database lokal atau backend)
   final List<User> _users = [
+    // Akun testing dengan data hardcode
     User(
       username: 'peminjam1',
       email: 'peminjam1@email.com',
       password: 'password123',
       role: 'Peminjam',
+      profileImage: 'assets/images/profile_image.png',
+      bio: 'Fotografer freelance di padang suka outdoor photo shoot',
+      joinDate: DateTime(2024, 1, 15), // Data tetap untuk testing
+      isVerified: true,
     ),
     User(
       username: 'pemilik1',
       email: 'pemilik1@email.com',
       password: 'password123',
       role: 'Pemilik',
+      profileImage: 'assets/images/profile_image2.jpeg',
+      bio: 'Maniak pengoleksi kamera yang sudah ditandatangani bahill',
+      joinDate: DateTime(2023, 6, 20), // Data tetap untuk testing
+      isVerified: true,
     ),
   ];
 

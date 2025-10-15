@@ -381,11 +381,47 @@ class _ProdukList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.separated(
-      itemCount: items.length,
+      itemCount: items.isEmpty ? 1 : items.length,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       separatorBuilder: (_, __) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
+        // Show placeholder if no items
+        if (items.isEmpty) {
+          return Container(
+            padding: const EdgeInsets.symmetric(vertical: 40),
+            child: Center(
+              child: Column(
+                children: [
+                  Image.asset(
+                    'assets/images/no_produk.png',
+                    width: 120,
+                    height: 120,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    disabled
+                        ? 'Tidak ada produk yang dibooking'
+                        : 'Belum ada produk',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey[600],
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    disabled
+                        ? 'Produk yang dibooking akan muncul di sini'
+                        : 'Tambahkan produk pertama Anda',
+                    style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
         final p = items[index];
         final isChecked = checked[p.id] ?? false;
         return Card(

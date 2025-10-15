@@ -18,30 +18,35 @@ class _PemilikDashboardPageState extends State<PemilikDashboardPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   DrawerMenu _activeMenu = DrawerMenu.dashboard;
 
-  // Dummy data for statistics
-  int pendapatanBulanIni = 3250000; // rupiah
-  int produkDisewa = 5;
-  int produkTersedia = 12;
+  // Check if current user is test account (pemilik1 / Mas Amba)
+  bool get _isTestAccount => Session.username == 'pemilik1';
 
-  // Dummy recent activities
-  final List<_AktivitasItem> _aktivitas = [
-    _AktivitasItem(
-      icon: 'assets/images/notif_sistem.svg',
-      description: 'Produk Nikon Z6 III baru saja dibooking',
-    ),
-    _AktivitasItem(
-      icon: 'assets/images/notif_sistem.svg',
-      description: 'Anda menerima ulasan baru pada Canon EOS R5',
-    ),
-    _AktivitasItem(
-      icon: 'assets/images/notif_sistem.svg',
-      description: 'Pembayaran untuk Sony A7 IV telah dikonfirmasi',
-    ),
-    _AktivitasItem(
-      icon: 'assets/images/notif_sistem.svg',
-      description: 'Sewa lensa 24-70mm selesai hari ini',
-    ),
-  ];
+  // Data for statistics - only for test account
+  int get _pendapatanBulanIni => _isTestAccount ? 3250000 : 0;
+  int get _produkDisewa => _isTestAccount ? 5 : 0;
+  int get _produkTersedia => _isTestAccount ? 12 : 0;
+
+  // Recent activities - only for test account
+  List<_AktivitasItem> get _aktivitas => _isTestAccount
+      ? [
+          _AktivitasItem(
+            icon: 'assets/images/notif_sistem.svg',
+            description: 'Produk Nikon Z6 III baru saja dibooking',
+          ),
+          _AktivitasItem(
+            icon: 'assets/images/notif_sistem.svg',
+            description: 'Anda menerima ulasan baru pada Canon EOS R5',
+          ),
+          _AktivitasItem(
+            icon: 'assets/images/notif_sistem.svg',
+            description: 'Pembayaran untuk Sony A7 IV telah dikonfirmasi',
+          ),
+          _AktivitasItem(
+            icon: 'assets/images/notif_sistem.svg',
+            description: 'Sewa lensa 24-70mm selesai hari ini',
+          ),
+        ]
+      : [];
 
   @override
   Widget build(BuildContext context) {
@@ -86,9 +91,10 @@ class _PemilikDashboardPageState extends State<PemilikDashboardPage> {
             ),
             const SizedBox(height: 20),
             _StatRow(
-              pendapatan: pendapatanBulanIni,
-              disewa: produkDisewa,
-              tersedia: produkTersedia,
+              pendapatan: _pendapatanBulanIni,
+              disewa: _produkDisewa,
+              tersedia: _produkTersedia,
+              isTestAccount: _isTestAccount,
             ),
             const SizedBox(height: 24),
             const Text(
@@ -154,7 +160,7 @@ class _PemilikDashboardPageState extends State<PemilikDashboardPage> {
               ],
             ),
             const SizedBox(height: 32),
-            _AktivitasCard(items: _aktivitas),
+            _AktivitasCard(items: _aktivitas, isTestAccount: _isTestAccount),
           ],
         ),
       ),
@@ -166,10 +172,13 @@ class _StatRow extends StatelessWidget {
   final int pendapatan;
   final int disewa;
   final int tersedia;
+  final bool isTestAccount;
+
   const _StatRow({
     required this.pendapatan,
     required this.disewa,
     required this.tersedia,
+    required this.isTestAccount,
   });
 
   String _formatRupiah(int value) {
@@ -219,24 +228,36 @@ class _StatRow extends StatelessWidget {
         card(
           label: 'Pendapatan Bulan Ini',
           value: Text(
-            _formatRupiah(pendapatan),
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+            isTestAccount ? _formatRupiah(pendapatan) : '-',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: isTestAccount ? Colors.black : Colors.grey,
+            ),
           ),
         ),
         const SizedBox(width: 12),
         card(
           label: 'Produk Disewa',
           value: Text(
-            disewa.toString(),
-            style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800),
+            isTestAccount ? disewa.toString() : '-',
+            style: TextStyle(
+              fontSize: 26,
+              fontWeight: FontWeight.w800,
+              color: isTestAccount ? Colors.black : Colors.grey,
+            ),
           ),
         ),
         const SizedBox(width: 12),
         card(
           label: 'Produk Tersedia',
           value: Text(
-            tersedia.toString(),
-            style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800),
+            isTestAccount ? tersedia.toString() : '-',
+            style: TextStyle(
+              fontSize: 26,
+              fontWeight: FontWeight.w800,
+              color: isTestAccount ? Colors.black : Colors.grey,
+            ),
           ),
         ),
       ],
@@ -252,7 +273,9 @@ class _AktivitasItem {
 
 class _AktivitasCard extends StatelessWidget {
   final List<_AktivitasItem> items;
-  const _AktivitasCard({required this.items});
+  final bool isTestAccount;
+
+  const _AktivitasCard({required this.items, required this.isTestAccount});
 
   @override
   Widget build(BuildContext context) {
@@ -269,31 +292,64 @@ class _AktivitasCard extends StatelessWidget {
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 12),
-            ListView.separated(
-              itemCount: items.length,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              separatorBuilder: (_, __) => const Divider(height: 20),
-              itemBuilder: (context, index) {
-                final a = items[index];
-                return Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SvgPicture.asset(a.icon, width: 28, height: 28),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        a.description,
-                        style: const TextStyle(
+
+            // Show placeholder for new users
+            if (!isTestAccount)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 24),
+                child: Center(
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.inbox_outlined,
+                        size: 48,
+                        color: Colors.grey[400],
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Belum ada aktivitas',
+                        style: TextStyle(
                           fontSize: 14,
+                          color: Colors.grey[600],
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                    ),
-                  ],
-                );
-              },
-            ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Aktivitas akan muncul di sini',
+                        style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            else
+              // Show actual activities for test account
+              ListView.separated(
+                itemCount: items.length,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                separatorBuilder: (_, __) => const Divider(height: 20),
+                itemBuilder: (context, index) {
+                  final a = items[index];
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SvgPicture.asset(a.icon, width: 28, height: 28),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          a.description,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
           ],
         ),
       ),

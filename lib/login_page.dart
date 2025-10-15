@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'models/session.dart';
 import 'services/user_service.dart';
+import 'providers/profile_provider.dart';
+import 'providers/peminjam_profile_provider.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -45,9 +48,21 @@ class _LoginPageState extends State<LoginPage> {
     // Login berhasil, simpan ke session
     if (role == 'Pemilik') {
       Session.login(UserRole.pemilik, user: user);
+      // Reload profile provider
+      final profileProvider = Provider.of<ProfileProvider>(
+        context,
+        listen: false,
+      );
+      profileProvider.reloadFromSession();
       Navigator.pushReplacementNamed(context, '/pemilik/dashboard');
     } else {
       Session.login(UserRole.peminjam, user: user);
+      // Reload profile provider
+      final profileProvider = Provider.of<PeminjamProfileProvider>(
+        context,
+        listen: false,
+      );
+      profileProvider.reloadFromSession();
       Navigator.pushReplacementNamed(context, '/home');
     }
   }
