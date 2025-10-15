@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../widgets/app_drawer.dart';
+import '../models/session.dart';
 
 // ...existing code from original notification_page.dart...
 class NotificationItem {
@@ -57,20 +58,39 @@ class _NotificationPageState extends State<NotificationPage> {
       key: _scaffoldKey,
       backgroundColor: Colors.grey[100],
       drawerScrimColor: Colors.black.withOpacity(0.4),
-      drawer: AppDrawer(
-        activeMenu: activeDrawerMenu,
-        onMenuTap: (menu) {
-          setState(() => activeDrawerMenu = menu);
-          if (menu == DrawerMenu.home) {
-            Navigator.pushReplacementNamed(context, '/home');
-          } else if (menu == DrawerMenu.profil) {
-            Navigator.pushReplacementNamed(context, '/profile');
-          } else if (menu == DrawerMenu.logout) {
-            Navigator.pushNamedAndRemoveUntil(context, '/login', (_) => false);
-          }
-          // Tambahkan navigasi lain sesuai kebutuhan
-        },
-      ),
+      drawer: Session.isPemilik
+          ? AppDrawer(
+              activeMenu: DrawerMenu.notifikasi,
+              role: 'pemilik',
+              onMenuTap: (menu) {
+                if (menu == DrawerMenu.dashboard) {
+                  Navigator.pushReplacementNamed(context, '/pemilik/dashboard');
+                } else if (menu == DrawerMenu.produk) {
+                  Navigator.pushReplacementNamed(context, '/pemilik/produk');
+                } else if (menu == DrawerMenu.profil) {
+                  Navigator.pushReplacementNamed(context, '/pemilik/profile');
+                }
+                // logout handled internally
+              },
+            )
+          : AppDrawer(
+              activeMenu: activeDrawerMenu,
+              role: 'peminjam',
+              onMenuTap: (menu) {
+                setState(() => activeDrawerMenu = menu);
+                if (menu == DrawerMenu.home) {
+                  Navigator.pushReplacementNamed(context, '/home');
+                } else if (menu == DrawerMenu.profil) {
+                  Navigator.pushReplacementNamed(context, '/profile');
+                } else if (menu == DrawerMenu.logout) {
+                  Navigator.pushNamedAndRemoveUntil(
+                    context,
+                    '/login',
+                    (_) => false,
+                  );
+                }
+              },
+            ),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,

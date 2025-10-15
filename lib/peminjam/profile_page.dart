@@ -25,6 +25,7 @@ class _ProfilePageState extends State<ProfilePage> {
       drawerScrimColor: Colors.black.withOpacity(0.4),
       drawer: AppDrawer(
         activeMenu: activeDrawerMenu,
+        role: 'peminjam',
         onMenuTap: (menu) {
           setState(() => activeDrawerMenu = menu);
           switch (menu) {
@@ -38,11 +39,9 @@ class _ProfilePageState extends State<ProfilePage> {
               // already on profile
               break;
             case DrawerMenu.logout:
-              Navigator.pushNamedAndRemoveUntil(
-                context,
-                '/login',
-                (_) => false,
-              );
+            case DrawerMenu.dashboard:
+            case DrawerMenu.produk:
+              // logout handled in drawer, dashboard/produk not available for peminjam
               break;
           }
         },

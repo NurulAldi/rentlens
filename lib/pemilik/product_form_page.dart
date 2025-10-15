@@ -48,7 +48,8 @@ class _ProductFormPageState extends State<ProductFormPage> {
       text: p != null ? p.pricePerDay.toStringAsFixed(0) : '',
     );
     _descCtrl = TextEditingController(text: p?.description ?? '');
-    _selectedCategory = _categories.first; // Default to first
+    _selectedCategory =
+        p?.category ?? _categories.first; // Use product category or default
   }
 
   @override
@@ -94,8 +95,10 @@ class _ProductFormPageState extends State<ProductFormPage> {
           ) ??
           0,
       rating: widget.initialProduct?.rating ?? 0,
-      owner: widget.initialProduct?.owner ?? 'Anda',
+      owner: widget.initialProduct?.owner ?? 'Mas Amba',
       description: _descCtrl.text.trim(),
+      category: _selectedCategory,
+      isBooked: widget.initialProduct?.isBooked ?? false,
     );
 
     Navigator.pop(context, product);

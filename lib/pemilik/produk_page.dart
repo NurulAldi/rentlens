@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
 
 import '../models/product.dart';
-import 'pemilik_drawer.dart';
+import '../widgets/app_drawer.dart';
+import '../providers/product_provider.dart';
 import 'product_form_page.dart';
 
 class PemilikProdukPage extends StatefulWidget {
@@ -14,39 +16,20 @@ class PemilikProdukPage extends StatefulWidget {
 
 class _PemilikProdukPageState extends State<PemilikProdukPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  PemilikDrawerMenu _activeMenu = PemilikDrawerMenu.produk;
-
-  final List<Product> _tersedia = List.generate(
-    4,
-    (i) => Product(
-      id: 't$i',
-      name: 'Nikon Z6 III',
-      imageAsset: 'assets/images/gambar_produk.png',
-      pricePerDay: 199000,
-      rating: 4.0,
-      owner: 'Anda',
-    ),
-  );
-  final List<Product> _dibooking = List.generate(
-    1,
-    (i) => Product(
-      id: 'b$i',
-      name: 'Nikon Z6 III',
-      imageAsset: 'assets/images/gambar_produk.png',
-      pricePerDay: 199000,
-      rating: 4.0,
-      owner: 'Anda',
-    ),
-  );
+  DrawerMenu _activeMenu = DrawerMenu.produk;
 
   String _kategori = 'Semua';
   bool _pilihSemua = false;
   final Map<String, bool> _checked = {};
 
   void _togglePilihSemua(bool value) {
+    final provider = Provider.of<ProductProvider>(context, listen: false);
     setState(() {
       _pilihSemua = value;
-      for (final p in [..._tersedia, ..._dibooking]) {
+      for (final p in [
+        ...provider.availableProducts,
+        ...provider.bookedProducts,
+      ]) {
         _checked[p.id] = value;
       }
     });
@@ -129,9 +112,9 @@ class _PemilikProdukPageState extends State<PemilikProdukPage> {
     );
 
     if (confirmed == true) {
+      final provider = Provider.of<ProductProvider>(context, listen: false);
+      provider.deleteProduct(p.id);
       setState(() {
-        _tersedia.removeWhere((e) => e.id == p.id);
-        _dibooking.removeWhere((e) => e.id == p.id);
         _checked.remove(p.id);
       });
     }
@@ -139,120 +122,126 @@ class _PemilikProdukPageState extends State<PemilikProdukPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: _scaffoldKey,
-      backgroundColor: Colors.grey[100],
-      drawer: PemilikDrawer(
-        activeMenu: _activeMenu,
-        onMenuTap: (m) {
-          setState(() => _activeMenu = m);
-          switch (m) {
-            case PemilikDrawerMenu.dashboard:
-              Navigator.pushReplacementNamed(context, '/pemilik/dashboard');
-              break;
-            case PemilikDrawerMenu.produk:
-              // already here
-              break;
-            case PemilikDrawerMenu.notifikasi:
-              Navigator.pushReplacementNamed(context, '/notifications');
-              break;
-            case PemilikDrawerMenu.profil:
-              Navigator.pushReplacementNamed(context, '/profile');
-              break;
-            case PemilikDrawerMenu.logout:
-              // handled in drawer
-              break;
-          }
-        },
-      ),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          onPressed: () => _scaffoldKey.currentState?.openDrawer(),
-          icon: SvgPicture.asset(
-            'assets/images/sidebar_ham.svg',
-            width: 24,
-            height: 24,
+    return Consumer<ProductProvider>(
+      builder: (context, productProvider, child) {
+        final tersedia = productProvider.availableProducts;
+        final dibooking = productProvider.bookedProducts;
+
+        return Scaffold(
+          key: _scaffoldKey,
+          backgroundColor: Colors.grey[100],
+          drawer: AppDrawer(
+            activeMenu: _activeMenu,
+            role: 'pemilik',
+            onMenuTap: (m) {
+              setState(() => _activeMenu = m);
+              switch (m) {
+                case DrawerMenu.dashboard:
+                  Navigator.pushReplacementNamed(context, '/pemilik/dashboard');
+                  break;
+                case DrawerMenu.produk:
+                  // already here
+                  break;
+                case DrawerMenu.notifikasi:
+                  Navigator.pushReplacementNamed(context, '/notifications');
+                  break;
+                case DrawerMenu.profil:
+                  Navigator.pushReplacementNamed(context, '/profile');
+                  break;
+                case DrawerMenu.logout:
+                case DrawerMenu.home:
+                  // handled in drawer
+                  break;
+              }
+            },
           ),
-        ),
-        actions: [
-          IconButton(
-            onPressed: () {},
-            icon: SvgPicture.asset(
-              'assets/images/searchbar.svg',
-              width: 24,
-              height: 24,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            leading: IconButton(
+              onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+              icon: SvgPicture.asset(
+                'assets/images/sidebar_ham.svg',
+                width: 24,
+                height: 24,
+              ),
+            ),
+            actions: [
+              IconButton(
+                onPressed: () {},
+                icon: SvgPicture.asset(
+                  'assets/images/searchbar.svg',
+                  width: 24,
+                  height: 24,
+                ),
+              ),
+            ],
+          ),
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _ActionBar(
+                  kategori: _kategori,
+                  onTambah: () async {
+                    // Navigate to Add mode
+                    final result = await Navigator.push<Product>(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const ProductFormPage(),
+                      ),
+                    );
+                    if (result != null) {
+                      productProvider.addProduct(result);
+                    }
+                  },
+                  onKategoriChanged: (val) => setState(() => _kategori = val),
+                  onPilihSemua: () => _togglePilihSemua(!_pilihSemua),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Produk Tersedia',
+                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+                ),
+                const SizedBox(height: 8),
+                _ProdukList(
+                  items: tersedia,
+                  checked: _checked,
+                  disabled: false,
+                  onChecked: (id, val) => setState(() => _checked[id] = val),
+                  onHapus: _onHapusProduk,
+                  onEdit: (p) async {
+                    final edited = await Navigator.push<Product>(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ProductFormPage(initialProduct: p),
+                      ),
+                    );
+                    if (edited != null) {
+                      productProvider.updateProduct(edited);
+                    }
+                  },
+                ),
+                const SizedBox(height: 20),
+                const Text(
+                  'Produk Dibooking',
+                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+                ),
+                const SizedBox(height: 8),
+                _ProdukList(
+                  items: dibooking,
+                  checked: _checked,
+                  disabled: true,
+                  onChecked: (id, val) => setState(() => _checked[id] = val),
+                  onHapus: _onHapusProduk,
+                  onEdit: (_) {},
+                ),
+              ],
             ),
           ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _ActionBar(
-              kategori: _kategori,
-              onTambah: () async {
-                // Navigate to Add mode
-                final result = await Navigator.push<Product>(
-                  context,
-                  MaterialPageRoute(builder: (_) => const ProductFormPage()),
-                );
-                if (result != null) {
-                  setState(() {
-                    _tersedia.add(result);
-                  });
-                }
-              },
-              onKategoriChanged: (val) => setState(() => _kategori = val),
-              onPilihSemua: () => _togglePilihSemua(!_pilihSemua),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Produk Tersedia',
-              style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
-            ),
-            const SizedBox(height: 8),
-            _ProdukList(
-              items: _tersedia,
-              checked: _checked,
-              disabled: false,
-              onChecked: (id, val) => setState(() => _checked[id] = val),
-              onHapus: _onHapusProduk,
-              onEdit: (p) async {
-                final edited = await Navigator.push<Product>(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => ProductFormPage(initialProduct: p),
-                  ),
-                );
-                if (edited != null) {
-                  setState(() {
-                    final idx = _tersedia.indexWhere((e) => e.id == edited.id);
-                    if (idx != -1) _tersedia[idx] = edited;
-                  });
-                }
-              },
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              'Produk Dibooking',
-              style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
-            ),
-            const SizedBox(height: 8),
-            _ProdukList(
-              items: _dibooking,
-              checked: _checked,
-              disabled: true,
-              onChecked: (id, val) => setState(() => _checked[id] = val),
-              onHapus: _onHapusProduk,
-              onEdit: (_) {},
-            ),
-          ],
-        ),
-      ),
+        );
+      },
     );
   }
 }

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'pemilik_drawer.dart';
+import 'package:provider/provider.dart';
+import '../widgets/app_drawer.dart';
+import '../pages/product_detail_page.dart';
+import '../providers/product_provider.dart';
 
 class PemilikProfilePage extends StatefulWidget {
   const PemilikProfilePage({super.key});
@@ -13,7 +16,7 @@ class _PemilikProfilePageState extends State<PemilikProfilePage>
     with SingleTickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   late TabController _tabController;
-  PemilikDrawerMenu activeMenu = PemilikDrawerMenu.profil;
+  DrawerMenu activeMenu = DrawerMenu.profil;
 
   final List<String> _categories = const [
     'Semua',
@@ -42,24 +45,26 @@ class _PemilikProfilePageState extends State<PemilikProfilePage>
       key: _scaffoldKey,
       backgroundColor: Colors.grey[100],
       drawerScrimColor: Colors.black.withOpacity(0.4),
-      drawer: PemilikDrawer(
+      drawer: AppDrawer(
         activeMenu: activeMenu,
+        role: 'pemilik',
         onMenuTap: (menu) {
           setState(() => activeMenu = menu);
           switch (menu) {
-            case PemilikDrawerMenu.dashboard:
+            case DrawerMenu.dashboard:
               Navigator.pushReplacementNamed(context, '/home');
               break;
-            case PemilikDrawerMenu.produk:
+            case DrawerMenu.produk:
               // navigate to produk page if exists
               break;
-            case PemilikDrawerMenu.notifikasi:
+            case DrawerMenu.notifikasi:
               Navigator.pushReplacementNamed(context, '/notifications');
               break;
-            case PemilikDrawerMenu.profil:
+            case DrawerMenu.profil:
               // already here
               break;
-            case PemilikDrawerMenu.logout:
+            case DrawerMenu.logout:
+            case DrawerMenu.home:
               // handled in drawer
               break;
           }
@@ -367,82 +372,127 @@ class _StoreTab extends StatelessWidget {
           const SizedBox(height: 12),
           // Grid 2 kolom
           Expanded(
-            child: GridView.builder(
-              itemCount: 6,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: 0.78,
-              ),
-              itemBuilder: (context, index) {
-                return Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Color(0x14000000),
-                        blurRadius: 10,
-                        offset: Offset(0, 4),
-                      ),
-                    ],
+            child: Consumer<ProductProvider>(
+              builder: (context, productProvider, child) {
+                // Filter produk berdasarkan kategori dan owner
+                final ownerProducts = productProvider.getProductsByOwner(
+                  'Mas Amba',
+                );
+                final filteredProducts = selectedIndex == 0
+                    ? ownerProducts
+                    : ownerProducts
+                          .where(
+                            (p) =>
+                                p.category?.toLowerCase() ==
+                                categories[selectedIndex].toLowerCase(),
+                          )
+                          .toList();
+
+                if (filteredProducts.isEmpty) {
+                  return const Center(child: Text('Tidak ada produk'));
+                }
+
+                return GridView.builder(
+                  itemCount: filteredProducts.length,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                    childAspectRatio: 0.78,
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ClipRRect(
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(12),
-                          topRight: Radius.circular(12),
-                        ),
-                        child: AspectRatio(
-                          aspectRatio: 16 / 9,
-                          child: Image.asset(
-                            'assets/images/gambar_produk.png',
-                            fit: BoxFit.cover,
+                  itemBuilder: (context, index) {
+                    final product = filteredProducts[index];
+
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => ProductDetailPage(product: product),
                           ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 8),
-                        child: Text(
-                          'Nikon D5600',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(fontWeight: FontWeight.w600),
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 8),
-                        child: Text(
-                          'Rp 199.000/hari',
-                          style: TextStyle(
-                            color: Color(0xFFEA7A00),
-                            fontWeight: FontWeight.w600,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 8),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.star,
-                              color: Color(0xFFFFC107),
-                              size: 16,
+                        );
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Color(0x14000000),
+                              blurRadius: 10,
+                              offset: Offset(0, 4),
                             ),
-                            SizedBox(width: 4),
-                            Text('4.0', style: TextStyle(fontSize: 12)),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            ClipRRect(
+                              borderRadius: const BorderRadius.only(
+                                topLeft: Radius.circular(12),
+                                topRight: Radius.circular(12),
+                              ),
+                              child: AspectRatio(
+                                aspectRatio: 16 / 9,
+                                child: Image.asset(
+                                  product.imageAsset,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                              ),
+                              child: Text(
+                                product.name,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                              ),
+                              child: Text(
+                                'Rp ${product.pricePerDay.toStringAsFixed(0)}/hari',
+                                style: const TextStyle(
+                                  color: Color(0xFFEA7A00),
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(
+                                    Icons.star,
+                                    color: Color(0xFFFFC107),
+                                    size: 16,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    product.rating.toString(),
+                                    style: const TextStyle(fontSize: 12),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ],
                         ),
                       ),
-                    ],
-                  ),
+                    );
+                  },
                 );
               },
             ),
