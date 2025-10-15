@@ -22,7 +22,7 @@ class _HomePageState extends State<HomePage> {
     'Kamera',
     'Lensa',
     'Tripod',
-    'Aksesoris',
+    'Lighting',
   ];
   int selectedIndex = 0;
   DrawerMenu activeDrawerMenu = DrawerMenu.home;

@@ -125,8 +125,25 @@ class _PemilikProdukPageState extends State<PemilikProdukPage> {
   Widget build(BuildContext context) {
     return Consumer<ProductProvider>(
       builder: (context, productProvider, child) {
-        final tersedia = productProvider.availableProducts;
-        final dibooking = productProvider.bookedProducts;
+        // Apply category filter
+        List<Product> tersedia;
+        List<Product> dibooking;
+
+        if (_kategori == 'Semua') {
+          tersedia = productProvider.availableProducts;
+          dibooking = productProvider.bookedProducts;
+        } else {
+          tersedia = productProvider.availableProducts
+              .where(
+                (p) => p.category?.toLowerCase() == _kategori.toLowerCase(),
+              )
+              .toList();
+          dibooking = productProvider.bookedProducts
+              .where(
+                (p) => p.category?.toLowerCase() == _kategori.toLowerCase(),
+              )
+              .toList();
+        }
 
         return Scaffold(
           key: _scaffoldKey,
@@ -316,6 +333,10 @@ class _ActionBar extends StatelessWidget {
                     DropdownMenuItem(value: 'Kamera', child: Text('Kamera')),
                     DropdownMenuItem(value: 'Lensa', child: Text('Lensa')),
                     DropdownMenuItem(value: 'Tripod', child: Text('Tripod')),
+                    DropdownMenuItem(
+                      value: 'Lighting',
+                      child: Text('Lighting'),
+                    ),
                   ],
                   onChanged: (v) {
                     if (v != null) onKategoriChanged(v);
@@ -365,6 +386,17 @@ class _ProdukList extends StatelessWidget {
     required this.onEdit,
   });
 
+  String _formatRupiah(int value) {
+    final s = value.toString();
+    final chars = s.split('').reversed.toList();
+    final buf = StringBuffer();
+    for (int i = 0; i < chars.length; i++) {
+      if (i != 0 && i % 3 == 0) buf.write('.');
+      buf.write(chars[i]);
+    }
+    return buf.toString().split('').reversed.join();
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListView.separated(
@@ -404,15 +436,15 @@ class _ProdukList extends StatelessWidget {
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
+                    children: [
                       Text(
-                        'Nikon Z6 III',
-                        style: TextStyle(fontWeight: FontWeight.w700),
+                        p.name,
+                        style: const TextStyle(fontWeight: FontWeight.w700),
                       ),
-                      SizedBox(height: 2),
+                      const SizedBox(height: 2),
                       Text(
-                        'Rp 199.000/hari',
-                        style: TextStyle(color: Color(0xFFEA7A00)),
+                        'Rp ${_formatRupiah(p.pricePerDay.toInt())}/hari',
+                        style: const TextStyle(color: Color(0xFFEA7A00)),
                       ),
                     ],
                   ),

@@ -24,7 +24,7 @@ class _PemilikProfilePageState extends State<PemilikProfilePage>
     'Kamera',
     'Lensa',
     'Tripod',
-    'Aksesoris',
+    'Lighting',
   ];
   int _selectedCategory = 0;
 
