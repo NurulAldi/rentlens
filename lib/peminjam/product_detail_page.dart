@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../models/product.dart';
+import 'booking_page.dart';
 
 // ...existing code from original product_detail_page.dart...
 
@@ -189,7 +190,14 @@ class _ProductDetailPageState extends State<ProductDetailPage>
                     ),
                     elevation: 6,
                   ),
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => BookingPage(product: product),
+                      ),
+                    );
+                  },
                   child: const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 20),
                     child: Text(
