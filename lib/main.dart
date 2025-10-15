@@ -5,6 +5,8 @@ import 'splash_page.dart';
 import 'peminjam/home_page.dart';
 import 'peminjam/notification_page.dart';
 import 'peminjam/profile_page.dart';
+import 'pemilik/produk_page.dart';
+import 'pemilik/dashboard_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -29,6 +31,8 @@ class MyApp extends StatelessWidget {
         '/home': (context) => const HomePage(),
         '/notifications': (context) => const NotificationPage(),
         '/profile': (context) => const ProfilePage(),
+        '/pemilik/produk': (context) => const PemilikProdukPage(),
+        '/pemilik/dashboard': (context) => const PemilikDashboardPage(),
       },
     );
   }

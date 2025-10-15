@@ -40,7 +40,11 @@ class _LoginPageState extends State<LoginPage> {
       users.firstWhere(
         (u) => u.email == email && u.password == password && u.role == role,
       );
-      Navigator.pushReplacementNamed(context, '/home');
+      if (role == 'Pemilik') {
+        Navigator.pushReplacementNamed(context, '/pemilik/produk');
+      } else {
+        Navigator.pushReplacementNamed(context, '/home');
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Email, password, atau role salah!')),
