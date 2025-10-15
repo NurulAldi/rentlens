@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../widgets/app_drawer.dart';
+import '../utils/drawer_navigator.dart';
 
 // ...existing code from original profile_page.dart...
 
@@ -26,25 +27,7 @@ class _ProfilePageState extends State<ProfilePage> {
       drawer: AppDrawer(
         activeMenu: activeDrawerMenu,
         role: 'peminjam',
-        onMenuTap: (menu) {
-          setState(() => activeDrawerMenu = menu);
-          switch (menu) {
-            case DrawerMenu.home:
-              Navigator.pushReplacementNamed(context, '/home');
-              break;
-            case DrawerMenu.notifikasi:
-              Navigator.pushReplacementNamed(context, '/notifications');
-              break;
-            case DrawerMenu.profil:
-              // already on profile
-              break;
-            case DrawerMenu.logout:
-            case DrawerMenu.dashboard:
-            case DrawerMenu.produk:
-              // logout handled in drawer, dashboard/produk not available for peminjam
-              break;
-          }
-        },
+        onMenuTap: (m) => DrawerNavigator.go(context, m),
       ),
       appBar: AppBar(
         backgroundColor: Colors.transparent,

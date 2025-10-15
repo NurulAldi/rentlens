@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import '../widgets/app_drawer.dart';
+import '../utils/drawer_navigator.dart';
 import '../widgets/product_image_widget.dart';
 import '../pages/product_detail_page.dart';
 import '../providers/product_provider.dart';
@@ -49,27 +50,7 @@ class _PemilikProfilePageState extends State<PemilikProfilePage>
       drawer: AppDrawer(
         activeMenu: activeMenu,
         role: 'pemilik',
-        onMenuTap: (menu) {
-          setState(() => activeMenu = menu);
-          switch (menu) {
-            case DrawerMenu.dashboard:
-              Navigator.pushReplacementNamed(context, '/home');
-              break;
-            case DrawerMenu.produk:
-              // navigate to produk page if exists
-              break;
-            case DrawerMenu.notifikasi:
-              Navigator.pushReplacementNamed(context, '/notifications');
-              break;
-            case DrawerMenu.profil:
-              // already here
-              break;
-            case DrawerMenu.logout:
-            case DrawerMenu.home:
-              // handled in drawer
-              break;
-          }
-        },
+        onMenuTap: (m) => DrawerNavigator.go(context, m),
       ),
       appBar: AppBar(
         backgroundColor: Colors.transparent,

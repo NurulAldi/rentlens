@@ -6,6 +6,7 @@ import '../models/product.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/product_image_widget.dart';
 import '../providers/product_provider.dart';
+import '../utils/drawer_navigator.dart';
 import 'product_form_page.dart';
 
 class PemilikProdukPage extends StatefulWidget {
@@ -151,27 +152,7 @@ class _PemilikProdukPageState extends State<PemilikProdukPage> {
           drawer: AppDrawer(
             activeMenu: _activeMenu,
             role: 'pemilik',
-            onMenuTap: (m) {
-              setState(() => _activeMenu = m);
-              switch (m) {
-                case DrawerMenu.dashboard:
-                  Navigator.pushReplacementNamed(context, '/pemilik/dashboard');
-                  break;
-                case DrawerMenu.produk:
-                  // already here
-                  break;
-                case DrawerMenu.notifikasi:
-                  Navigator.pushReplacementNamed(context, '/notifications');
-                  break;
-                case DrawerMenu.profil:
-                  Navigator.pushReplacementNamed(context, '/profile');
-                  break;
-                case DrawerMenu.logout:
-                case DrawerMenu.home:
-                  // handled in drawer
-                  break;
-              }
-            },
+            onMenuTap: (m) => DrawerNavigator.go(context, m),
           ),
           appBar: AppBar(
             backgroundColor: Colors.transparent,

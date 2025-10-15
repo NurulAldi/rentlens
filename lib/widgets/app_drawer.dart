@@ -18,6 +18,9 @@ class AppDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Gunakan role dari Session agar tidak mismatch
+    final bool isPeminjam = Session.isPeminjam;
+
     Widget item({
       required DrawerMenu menu,
       required String label,
@@ -27,11 +30,20 @@ class AppDrawer extends StatelessWidget {
       final active = menu == activeMenu;
       return InkWell(
         borderRadius: BorderRadius.circular(10),
-        onTap: () {
+        onTap: () async {
+          // Tutup drawer dulu → lalu navigasi (hindari race)
           Navigator.pop(context);
+          await Future.delayed(const Duration(milliseconds: 160));
+
           if (isLogout) {
             Session.logout();
-            Navigator.pushNamedAndRemoveUntil(context, '/login', (_) => false);
+            if (context.mounted) {
+              Navigator.pushNamedAndRemoveUntil(
+                context,
+                '/login',
+                (_) => false,
+              );
+            }
           } else {
             onMenuTap(menu);
           }
@@ -78,7 +90,7 @@ class AppDrawer extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               // Menu untuk peminjam
-              if (role == 'peminjam') ...[
+              if (isPeminjam) ...[
                 item(
                   menu: DrawerMenu.home,
                   label: 'Home',
@@ -87,7 +99,7 @@ class AppDrawer extends StatelessWidget {
                 const SizedBox(height: 8),
               ],
               // Menu untuk pemilik
-              if (role == 'pemilik') ...[
+              if (!isPeminjam) ...[
                 item(
                   menu: DrawerMenu.dashboard,
                   label: 'Dashboard',

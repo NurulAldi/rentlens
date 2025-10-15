@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../models/product.dart';
 import '../pages/product_detail_page.dart';
 import '../widgets/app_drawer.dart';
+import '../utils/drawer_navigator.dart';
 import '../widgets/product_image_widget.dart';
 import '../models/session.dart';
 import '../providers/product_provider.dart';
@@ -40,45 +41,11 @@ class _HomePageState extends State<HomePage> {
           key: _scaffoldKey,
           backgroundColor: Colors.grey[100],
           drawerScrimColor: Colors.black.withOpacity(0.4),
-          drawer: Session.isPemilik
-              ? AppDrawer(
-                  activeMenu: DrawerMenu.dashboard,
-                  role: 'pemilik',
-                  onMenuTap: (menu) {
-                    if (menu == DrawerMenu.produk) {
-                      Navigator.pushReplacementNamed(
-                        context,
-                        '/pemilik/produk',
-                      );
-                    } else if (menu == DrawerMenu.notifikasi) {
-                      Navigator.pushReplacementNamed(context, '/notifications');
-                    } else if (menu == DrawerMenu.profil) {
-                      Navigator.pushReplacementNamed(
-                        context,
-                        '/pemilik/profile',
-                      );
-                    }
-                    // logout handled internally
-                  },
-                )
-              : AppDrawer(
-                  activeMenu: activeDrawerMenu,
-                  role: 'peminjam',
-                  onMenuTap: (menu) {
-                    setState(() => activeDrawerMenu = menu);
-                    if (menu == DrawerMenu.notifikasi) {
-                      Navigator.pushReplacementNamed(context, '/notifications');
-                    } else if (menu == DrawerMenu.profil) {
-                      Navigator.pushReplacementNamed(context, '/profile');
-                    } else if (menu == DrawerMenu.logout) {
-                      Navigator.pushNamedAndRemoveUntil(
-                        context,
-                        '/login',
-                        (_) => false,
-                      );
-                    }
-                  },
-                ),
+          drawer: AppDrawer(
+            activeMenu: activeDrawerMenu,
+            role: Session.isPemilik ? 'pemilik' : 'peminjam',
+            onMenuTap: (m) => DrawerNavigator.go(context, m),
+          ),
           appBar: AppBar(
             backgroundColor: Colors.transparent,
             elevation: 0,

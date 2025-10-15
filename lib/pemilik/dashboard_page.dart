@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../widgets/app_drawer.dart';
+import '../utils/drawer_navigator.dart';
 import '../models/product.dart';
 import 'product_form_page.dart';
 
@@ -42,30 +43,6 @@ class _PemilikDashboardPageState extends State<PemilikDashboardPage> {
     ),
   ];
 
-  void _navigateMenu(DrawerMenu m) {
-    setState(() => _activeMenu = m);
-    switch (m) {
-      case DrawerMenu.dashboard:
-        // already here
-        break;
-      case DrawerMenu.produk:
-        Navigator.pushReplacementNamed(context, '/pemilik/produk');
-        break;
-      case DrawerMenu.notifikasi:
-        Navigator.pushReplacementNamed(context, '/notifications');
-        break;
-      case DrawerMenu.profil:
-        Navigator.pushReplacementNamed(context, '/profile');
-        break;
-      case DrawerMenu.logout:
-        // handled inside drawer
-        break;
-      case DrawerMenu.home:
-        // not applicable for pemilik
-        break;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -74,7 +51,7 @@ class _PemilikDashboardPageState extends State<PemilikDashboardPage> {
       drawer: AppDrawer(
         role: 'pemilik',
         activeMenu: _activeMenu,
-        onMenuTap: _navigateMenu,
+        onMenuTap: (m) => DrawerNavigator.go(context, m),
       ),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
