@@ -7,6 +7,7 @@ import 'peminjam/notification_page.dart';
 import 'peminjam/profile_page.dart';
 import 'pemilik/produk_page.dart';
 import 'pemilik/dashboard_page.dart';
+import 'pemilik/pemilik_profile_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -31,6 +32,7 @@ class MyApp extends StatelessWidget {
         '/home': (context) => const HomePage(),
         '/notifications': (context) => const NotificationPage(),
         '/profile': (context) => const ProfilePage(),
+        '/pemilik/profile': (context) => const PemilikProfilePage(),
         '/pemilik/produk': (context) => const PemilikProdukPage(),
         '/pemilik/dashboard': (context) => const PemilikDashboardPage(),
       },
