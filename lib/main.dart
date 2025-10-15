@@ -10,6 +10,7 @@ import 'pemilik/produk_page.dart';
 import 'pemilik/dashboard_page.dart';
 import 'pemilik/pemilik_profile_page.dart';
 import 'providers/product_provider.dart';
+import 'providers/profile_provider.dart';
 
 void main() {
   runApp(const MyApp());
@@ -20,8 +21,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => ProductProvider()..initializeDummyData(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => ProductProvider()..initializeDummyData(),
+        ),
+        ChangeNotifierProvider(create: (_) => ProfileProvider()),
+      ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Rent Lens',

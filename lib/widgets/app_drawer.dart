@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../models/session.dart';
 
-enum DrawerMenu { home, dashboard, produk, notifikasi, profil, logout }
+enum DrawerMenu { home, dashboard, produk, notifikasi, profil }
 
 class AppDrawer extends StatelessWidget {
   final DrawerMenu activeMenu;
@@ -124,13 +124,6 @@ class AppDrawer extends StatelessWidget {
                 menu: DrawerMenu.profil,
                 label: 'Profil',
                 iconAsset: 'assets/images/profile.svg',
-              ),
-              const SizedBox(height: 8),
-              item(
-                menu: DrawerMenu.logout,
-                label: 'Logout',
-                iconAsset: 'assets/images/logout.svg',
-                isLogout: true,
               ),
             ],
           ),

@@ -6,6 +6,10 @@ import '../utils/drawer_navigator.dart';
 import '../widgets/product_image_widget.dart';
 import '../pages/product_detail_page.dart';
 import '../providers/product_provider.dart';
+import '../models/session.dart';
+import '../providers/profile_provider.dart';
+import 'pemilik_edit_profile_page.dart';
+import 'dart:io';
 
 class PemilikProfilePage extends StatefulWidget {
   const PemilikProfilePage({super.key});
@@ -43,155 +47,214 @@ class _PemilikProfilePageState extends State<PemilikProfilePage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: _scaffoldKey,
-      backgroundColor: Colors.grey[100],
-      drawerScrimColor: Colors.black.withOpacity(0.4),
-      drawer: AppDrawer(
-        activeMenu: activeMenu,
-        role: 'pemilik',
-        onMenuTap: (m) => DrawerNavigator.go(context, m),
-      ),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          onPressed: () => _scaffoldKey.currentState?.openDrawer(),
-          icon: SvgPicture.asset(
-            'assets/images/sidebar_ham.svg',
-            width: 24,
-            height: 24,
+    return Consumer<ProfileProvider>(
+      builder: (context, profileProvider, child) {
+        return Scaffold(
+          key: _scaffoldKey,
+          backgroundColor: Colors.grey[100],
+          drawerScrimColor: Colors.black.withOpacity(0.4),
+          drawer: AppDrawer(
+            activeMenu: activeMenu,
+            role: 'pemilik',
+            onMenuTap: (m) => DrawerNavigator.go(context, m),
           ),
-        ),
-        actions: [
-          IconButton(
-            onPressed: () {},
-            icon: SvgPicture.asset(
-              'assets/images/setting.svg',
-              width: 24,
-              height: 24,
-            ),
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header
-            Row(
-              children: const [
-                CircleAvatar(
-                  radius: 24,
-                  backgroundImage: AssetImage(
-                    'assets/images/profile_image2.jpeg',
-                  ),
-                ),
-                SizedBox(width: 12),
-                Text(
-                  'Mas Amba',
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            // Biodata Pemilik
-            _SectionCard(
-              title: 'Biodata Pemilik',
-              trailing: const SizedBox.shrink(),
-              child: Column(
-                children: [
-                  _infoRow(
-                    'Terverifikasi',
-                    Image.asset(
-                      'assets/images/verified.png',
-                      width: 18,
-                      height: 18,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  _infoRow('Badge', const Text('Pemilik Aktif')),
-                  const SizedBox(height: 12),
-                  _infoRow(
-                    'Bio',
-                    const Text(
-                      'Maniak pengoleksi kamera yang sudah ditandatangani bahill',
-                      textAlign: TextAlign.right,
-                    ),
-                  ),
-                ],
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            leading: IconButton(
+              onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+              icon: SvgPicture.asset(
+                'assets/images/sidebar_ham.svg',
+                width: 24,
+                height: 24,
               ),
             ),
-
-            const SizedBox(height: 12),
-
-            // Stats Card
-            _StatsCard(),
-
-            const SizedBox(height: 12),
-
-            // Tabs
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color(0x14000000),
-                    blurRadius: 10,
-                    offset: Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  TabBar(
-                    controller: _tabController,
-                    indicatorColor: const Color(0xFF5C62F6),
-                    labelColor: Colors.black,
-                    tabs: [
-                      Tab(
-                        icon: SvgPicture.asset(
-                          'assets/images/store.svg',
-                          width: 22,
-                          height: 22,
-                        ),
-                      ),
-                      Tab(
-                        icon: SvgPicture.asset(
-                          'assets/images/star.svg',
-                          width: 22,
-                          height: 22,
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(
-                    height: 600, // fixed viewport height for demo scrollables
-                    child: TabBarView(
-                      controller: _tabController,
+            actions: [
+              PopupMenuButton<String>(
+                icon: SvgPicture.asset(
+                  'assets/images/setting.svg',
+                  width: 24,
+                  height: 24,
+                ),
+                offset: const Offset(0, 50),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                itemBuilder: (context) => [
+                  const PopupMenuItem(
+                    value: 'edit',
+                    child: Row(
                       children: [
-                        // Toko Tab
-                        _StoreTab(
-                          categories: _categories,
-                          selectedIndex: _selectedCategory,
-                          onSelect: (i) {
-                            setState(() => _selectedCategory = i);
-                          },
-                        ),
-                        // Ulasan Tab
-                        const _ReviewsTab(),
+                        Icon(Icons.edit, size: 20),
+                        SizedBox(width: 12),
+                        Text('Edit Profil'),
+                      ],
+                    ),
+                  ),
+                  const PopupMenuItem(
+                    value: 'logout',
+                    child: Row(
+                      children: [
+                        Icon(Icons.logout, size: 20, color: Colors.red),
+                        SizedBox(width: 12),
+                        Text('Logout', style: TextStyle(color: Colors.red)),
                       ],
                     ),
                   ),
                 ],
+                onSelected: (value) {
+                  if (value == 'edit') {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const PemilikEditProfilePage(),
+                      ),
+                    );
+                  } else if (value == 'logout') {
+                    Session.logout();
+                    Navigator.pushNamedAndRemoveUntil(
+                      context,
+                      '/login',
+                      (_) => false,
+                    );
+                  }
+                },
               ),
+            ],
+          ),
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header
+                Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 24,
+                      backgroundColor: Colors.grey.shade300,
+                      backgroundImage: profileProvider.imagePath != null
+                          ? FileImage(File(profileProvider.imagePath!))
+                          : profileProvider.imageAsset != null
+                          ? AssetImage(profileProvider.imageAsset!)
+                                as ImageProvider
+                          : null,
+                      child:
+                          profileProvider.imagePath == null &&
+                              profileProvider.imageAsset == null
+                          ? const Icon(
+                              Icons.person,
+                              size: 24,
+                              color: Colors.grey,
+                            )
+                          : null,
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      profileProvider.name,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                // Biodata Pemilik
+                _SectionCard(
+                  title: 'Biodata Pemilik',
+                  trailing: const SizedBox.shrink(),
+                  child: Column(
+                    children: [
+                      _infoRow(
+                        'Terverifikasi',
+                        Image.asset(
+                          'assets/images/verified.png',
+                          width: 18,
+                          height: 18,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      _infoRow('Badge', const Text('Pemilik Aktif')),
+                      const SizedBox(height: 12),
+                      _infoRow(
+                        'Bio',
+                        Text(profileProvider.bio, textAlign: TextAlign.right),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
+                // Stats Card
+                _StatsCard(),
+
+                const SizedBox(height: 12),
+
+                // Tabs
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x14000000),
+                        blurRadius: 10,
+                        offset: Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      TabBar(
+                        controller: _tabController,
+                        indicatorColor: const Color(0xFF5C62F6),
+                        labelColor: Colors.black,
+                        tabs: [
+                          Tab(
+                            icon: SvgPicture.asset(
+                              'assets/images/store.svg',
+                              width: 22,
+                              height: 22,
+                            ),
+                          ),
+                          Tab(
+                            icon: SvgPicture.asset(
+                              'assets/images/star.svg',
+                              width: 22,
+                              height: 22,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(
+                        height: 600,
+                        child: TabBarView(
+                          controller: _tabController,
+                          children: [
+                            // Toko Tab
+                            _StoreTab(
+                              categories: _categories,
+                              selectedIndex: _selectedCategory,
+                              onSelect: (i) {
+                                setState(() => _selectedCategory = i);
+                              },
+                            ),
+                            // Ulasan Tab
+                            const _ReviewsTab(),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

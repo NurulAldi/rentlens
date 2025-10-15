@@ -37,10 +37,6 @@ class DrawerNavigator {
           Navigator.pushReplacementNamed(context, '/pemilik/profile');
         }
         break;
-
-      case DrawerMenu.logout:
-        // Logout handled in AppDrawer
-        break;
     }
   }
 }
