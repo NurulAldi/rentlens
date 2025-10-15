@@ -11,6 +11,7 @@ import 'pemilik/dashboard_page.dart';
 import 'pemilik/pemilik_profile_page.dart';
 import 'providers/product_provider.dart';
 import 'providers/profile_provider.dart';
+import 'providers/peminjam_profile_provider.dart';
 
 void main() {
   runApp(const MyApp());
@@ -27,6 +28,7 @@ class MyApp extends StatelessWidget {
           create: (_) => ProductProvider()..initializeDummyData(),
         ),
         ChangeNotifierProvider(create: (_) => ProfileProvider()),
+        ChangeNotifierProvider(create: (_) => PeminjamProfileProvider()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

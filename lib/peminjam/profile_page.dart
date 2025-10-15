@@ -1,9 +1,14 @@
 // Pindahan dari lib/profile_page.dart
 
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
 import '../widgets/app_drawer.dart';
 import '../utils/drawer_navigator.dart';
+import '../models/session.dart';
+import '../providers/peminjam_profile_provider.dart';
+import 'peminjam_edit_profile_page.dart';
 
 // ...existing code from original profile_page.dart...
 
@@ -20,158 +25,219 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: _scaffoldKey,
-      backgroundColor: Colors.grey[100],
-      drawerScrimColor: Colors.black.withOpacity(0.4),
-      drawer: AppDrawer(
-        activeMenu: activeDrawerMenu,
-        role: 'peminjam',
-        onMenuTap: (m) => DrawerNavigator.go(context, m),
-      ),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          onPressed: () => _scaffoldKey.currentState?.openDrawer(),
-          icon: SvgPicture.asset(
-            'assets/images/sidebar_ham.svg',
-            width: 24,
-            height: 24,
+    return Consumer<PeminjamProfileProvider>(
+      builder: (context, profileProvider, child) {
+        return Scaffold(
+          key: _scaffoldKey,
+          backgroundColor: Colors.grey[100],
+          drawerScrimColor: Colors.black.withOpacity(0.4),
+          drawer: AppDrawer(
+            activeMenu: activeDrawerMenu,
+            role: 'peminjam',
+            onMenuTap: (m) => DrawerNavigator.go(context, m),
           ),
-        ),
-        actions: [
-          IconButton(
-            onPressed: () {},
-            icon: SvgPicture.asset(
-              'assets/images/setting.svg',
-              width: 24,
-              height: 24,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            leading: IconButton(
+              onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+              icon: SvgPicture.asset(
+                'assets/images/sidebar_ham.svg',
+                width: 24,
+                height: 24,
+              ),
             ),
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header profile
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const CircleAvatar(
-                  radius: 28,
-                  backgroundImage: AssetImage(
-                    'assets/images/profile_image.png',
-                  ),
+            actions: [
+              PopupMenuButton<String>(
+                icon: SvgPicture.asset(
+                  'assets/images/setting.svg',
+                  width: 24,
+                  height: 24,
                 ),
-                const SizedBox(width: 12),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Text(
-                      'Mas Rusdi',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                      ),
+                offset: const Offset(0, 50),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                itemBuilder: (context) => [
+                  const PopupMenuItem(
+                    value: 'edit',
+                    child: Row(
+                      children: [
+                        Icon(Icons.edit, size: 20),
+                        SizedBox(width: 12),
+                        Text('Edit Profil'),
+                      ],
                     ),
-                    SizedBox(height: 2),
-                    Text(
-                      'Tanggal Bergabung: 9 September 2025',
-                      style: TextStyle(color: Colors.black54),
+                  ),
+                  const PopupMenuItem(
+                    value: 'logout',
+                    child: Row(
+                      children: [
+                        Icon(Icons.logout, size: 20, color: Colors.red),
+                        SizedBox(width: 12),
+                        Text('Logout', style: TextStyle(color: Colors.red)),
+                      ],
+                    ),
+                  ),
+                ],
+                onSelected: (value) {
+                  if (value == 'edit') {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const PeminjamEditProfilePage(),
+                      ),
+                    );
+                  } else if (value == 'logout') {
+                    Session.logout();
+                    Navigator.pushNamedAndRemoveUntil(
+                      context,
+                      '/login',
+                      (_) => false,
+                    );
+                  }
+                },
+              ),
+            ],
+          ),
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header profile
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    CircleAvatar(
+                      radius: 28,
+                      backgroundColor: Colors.grey.shade300,
+                      backgroundImage: profileProvider.imagePath != null
+                          ? FileImage(File(profileProvider.imagePath!))
+                          : profileProvider.imageAsset != null
+                          ? AssetImage(profileProvider.imageAsset!)
+                                as ImageProvider
+                          : null,
+                      child:
+                          profileProvider.imagePath == null &&
+                              profileProvider.imageAsset == null
+                          ? const Icon(
+                              Icons.person,
+                              size: 28,
+                              color: Colors.grey,
+                            )
+                          : null,
+                    ),
+                    const SizedBox(width: 12),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          profileProvider.name,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        const Text(
+                          'Tanggal Bergabung: 9 September 2025',
+                          style: TextStyle(color: Colors.black54),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
-            ),
-            const SizedBox(height: 16),
+                const SizedBox(height: 16),
 
-            // Biodata Peminjam Card
-            _SectionCard(
-              title: 'Biodata Peminjam',
-              child: Column(
-                children: [
-                  _infoRow(
-                    'Terverifikasi',
-
-                    Image.asset(
-                      'assets/images/verified.png',
-                      width: 18,
-                      height: 18,
-                    ),
+                // Biodata Peminjam Card
+                _SectionCard(
+                  title: 'Biodata Peminjam',
+                  child: Column(
+                    children: [
+                      _infoRow(
+                        'Terverifikasi',
+                        Image.asset(
+                          'assets/images/verified.png',
+                          width: 18,
+                          height: 18,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      _infoRow('Badge', const Text('Penyewa Aktif')),
+                      const SizedBox(height: 12),
+                      _infoRow(
+                        'Bio',
+                        Expanded(
+                          child: Text(
+                            profileProvider.bio,
+                            textAlign: TextAlign.right,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 12),
-                  _infoRow('Badge', const Text('Penyewa Aktif')),
-                  const SizedBox(height: 12),
-                  _infoRow(
-                    'Bio',
-                    const Expanded(
-                      child: Text(
-                        'Fotografer freelance di padang suka outdoor photo shoot',
-                        textAlign: TextAlign.right,
+                ),
+
+                const SizedBox(height: 16),
+
+                // History Peminjaman Card
+                _SectionCard(
+                  title: 'History Peminjaman',
+                  trailing: const Text(
+                    'More >',
+                    style: TextStyle(color: Colors.black54),
+                  ),
+                  child: Column(
+                    children: const [
+                      _HistoryItem(
+                        image: 'assets/images/gambar_produk.png',
+                        name: 'Nikon Z6 III',
+                        price: 'Rp 199.000/hari',
+                        date: 'Tanggal: 09/10/2025 - 13/10/2025',
+                      ),
+                      SizedBox(height: 12),
+                      _HistoryItem(
+                        image: 'assets/images/gambar_produk.png',
+                        name: 'Nikon Z6 III',
+                        price: 'Rp 199.000/hari',
+                        date: 'Tanggal: 08/10/2025 - 12/10/2025',
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                // Rating dan Ulasan
+                const Text(
+                  'Rating dan Ulasan',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: const [
+                    Icon(Icons.star, color: Color(0xFFFFC107), size: 32),
+                    SizedBox(width: 8),
+                    Text(
+                      '4,0',
+                      style: TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // History Peminjaman Card
-            _SectionCard(
-              title: 'History Peminjaman',
-              trailing: const Text(
-                'More >',
-                style: TextStyle(color: Colors.black54),
-              ),
-              child: Column(
-                children: const [
-                  _HistoryItem(
-                    image: 'assets/images/gambar_produk.png',
-                    name: 'Nikon Z6 III',
-                    price: 'Rp 199.000/hari',
-                    date: 'Tanggal: 09/10/2025 - 13/10/2025',
-                  ),
-                  SizedBox(height: 12),
-                  _HistoryItem(
-                    image: 'assets/images/gambar_produk.png',
-                    name: 'Nikon Z6 III',
-                    price: 'Rp 199.000/hari',
-                    date: 'Tanggal: 08/10/2025 - 12/10/2025',
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // Rating dan Ulasan
-            const Text(
-              'Rating dan Ulasan',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: const [
-                Icon(Icons.star, color: Color(0xFFFFC107), size: 32),
-                SizedBox(width: 8),
-                Text(
-                  '4,0',
-                  style: TextStyle(fontSize: 32, fontWeight: FontWeight.w700),
+                  ],
                 ),
+                const SizedBox(height: 4),
+                const Text('123.456', style: TextStyle(color: Colors.black54)),
+                const SizedBox(height: 12),
+
+                const _ReviewCard(),
               ],
             ),
-            const SizedBox(height: 4),
-            const Text('123.456', style: TextStyle(color: Colors.black54)),
-            const SizedBox(height: 12),
-
-            const _ReviewCard(),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }
