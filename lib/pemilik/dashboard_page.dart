@@ -4,11 +4,11 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../widgets/app_drawer.dart';
 import '../utils/drawer_navigator.dart';
 import '../models/product.dart';
+import '../models/session.dart';
 import 'product_form_page.dart';
 
 class PemilikDashboardPage extends StatefulWidget {
-  final String ownerName;
-  const PemilikDashboardPage({super.key, this.ownerName = 'Pemilik'});
+  const PemilikDashboardPage({super.key});
 
   @override
   State<PemilikDashboardPage> createState() => _PemilikDashboardPageState();
@@ -81,7 +81,7 @@ class _PemilikDashboardPageState extends State<PemilikDashboardPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Selamat Datang, ${widget.ownerName}!',
+              'Selamat Datang, ${Session.username}!',
               style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 20),
