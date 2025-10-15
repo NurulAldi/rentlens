@@ -6,6 +6,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../models/product.dart';
+import '../models/session.dart';
 import '../utils/image_storage_helper.dart';
 
 /// A single page that adapts for both Add and Edit Product flows.
@@ -111,7 +112,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
             ) ??
             0,
         rating: widget.initialProduct?.rating ?? 0,
-        owner: widget.initialProduct?.owner ?? 'Mas Amba',
+        owner: widget.initialProduct?.owner ?? Session.username,
         description: _descCtrl.text.trim(),
         category: _selectedCategory,
         isBooked: widget.initialProduct?.isBooked ?? false,

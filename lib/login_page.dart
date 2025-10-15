@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'models/session.dart';
-import 'register_page.dart';
+import 'services/user_service.dart';
+import 'providers/profile_provider.dart';
+import 'providers/peminjam_profile_provider.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -15,6 +18,7 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _obscure = true;
+  final _userService = UserService();
 
   @override
   void dispose() {
@@ -28,29 +32,38 @@ class _LoginPageState extends State<LoginPage> {
     final password = _passwordController.text;
     final role = isBorrower ? 'Peminjam' : 'Pemilik';
 
-    if (email.isEmpty || password.isEmpty) {
+    final (success, message, user) = _userService.login(
+      email: email,
+      password: password,
+      role: role,
+    );
+
+    if (!success || user == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Email dan password wajib diisi!')),
+        SnackBar(content: Text(message), backgroundColor: Colors.red),
       );
       return;
     }
 
-    // Cari user yang cocok
-    try {
-      users.firstWhere(
-        (u) => u.email == email && u.password == password && u.role == role,
+    // Login berhasil, simpan ke session
+    if (role == 'Pemilik') {
+      Session.login(UserRole.pemilik, user: user);
+      // Reload profile provider
+      final profileProvider = Provider.of<ProfileProvider>(
+        context,
+        listen: false,
       );
-      if (role == 'Pemilik') {
-        Session.login(UserRole.pemilik);
-        Navigator.pushReplacementNamed(context, '/pemilik/produk');
-      } else {
-        Session.login(UserRole.peminjam);
-        Navigator.pushReplacementNamed(context, '/home');
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Email, password, atau role salah!')),
+      profileProvider.reloadFromSession();
+      Navigator.pushReplacementNamed(context, '/pemilik/dashboard');
+    } else {
+      Session.login(UserRole.peminjam, user: user);
+      // Reload profile provider
+      final profileProvider = Provider.of<PeminjamProfileProvider>(
+        context,
+        listen: false,
       );
+      profileProvider.reloadFromSession();
+      Navigator.pushReplacementNamed(context, '/home');
     }
   }
 

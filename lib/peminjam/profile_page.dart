@@ -23,6 +23,24 @@ class _ProfilePageState extends State<ProfilePage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   DrawerMenu activeDrawerMenu = DrawerMenu.profil;
 
+  String _formatDate(DateTime date) {
+    final months = [
+      'Januari',
+      'Februari',
+      'Maret',
+      'April',
+      'Mei',
+      'Juni',
+      'Juli',
+      'Agustus',
+      'September',
+      'Oktober',
+      'November',
+      'Desember',
+    ];
+    return '${date.day} ${months[date.month - 1]} ${date.year}';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<PeminjamProfileProvider>(
@@ -140,9 +158,11 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
                         ),
                         const SizedBox(height: 2),
-                        const Text(
-                          'Tanggal Bergabung: 9 September 2025',
-                          style: TextStyle(color: Colors.black54),
+                        Text(
+                          profileProvider.joinDate != null
+                              ? 'Tanggal Bergabung: ${_formatDate(profileProvider.joinDate!)}'
+                              : 'Tanggal Bergabung: -',
+                          style: const TextStyle(color: Colors.black54),
                         ),
                       ],
                     ),
@@ -164,14 +184,19 @@ class _ProfilePageState extends State<ProfilePage> {
                         ),
                       ),
                       const SizedBox(height: 12),
-                      _infoRow('Badge', const Text('Penyewa Aktif')),
-                      const SizedBox(height: 12),
                       _infoRow(
                         'Bio',
                         Expanded(
                           child: Text(
-                            profileProvider.bio,
+                            profileProvider.bio.isEmpty
+                                ? '-'
+                                : profileProvider.bio,
                             textAlign: TextAlign.right,
+                            style: TextStyle(
+                              color: profileProvider.bio.isEmpty
+                                  ? Colors.grey
+                                  : Colors.black,
+                            ),
                           ),
                         ),
                       ),
@@ -184,27 +209,52 @@ class _ProfilePageState extends State<ProfilePage> {
                 // History Peminjaman Card
                 _SectionCard(
                   title: 'History Peminjaman',
-                  trailing: const Text(
-                    'More >',
-                    style: TextStyle(color: Colors.black54),
-                  ),
-                  child: Column(
-                    children: const [
-                      _HistoryItem(
-                        image: 'assets/images/gambar_produk.png',
-                        name: 'Nikon Z6 III',
-                        price: 'Rp 199.000/hari',
-                        date: 'Tanggal: 09/10/2025 - 13/10/2025',
-                      ),
-                      SizedBox(height: 12),
-                      _HistoryItem(
-                        image: 'assets/images/gambar_produk.png',
-                        name: 'Nikon Z6 III',
-                        price: 'Rp 199.000/hari',
-                        date: 'Tanggal: 08/10/2025 - 12/10/2025',
-                      ),
-                    ],
-                  ),
+                  trailing: profileProvider.name == 'Mas Rusdi'
+                      ? const Text(
+                          'More >',
+                          style: TextStyle(color: Colors.black54),
+                        )
+                      : null,
+                  child: profileProvider.name == 'Mas Rusdi'
+                      ? Column(
+                          children: const [
+                            _HistoryItem(
+                              image: 'assets/images/gambar_produk.png',
+                              name: 'Nikon Z6 III',
+                              price: 'Rp 199.000/hari',
+                              date: 'Tanggal: 09/10/2025 - 13/10/2025',
+                            ),
+                            SizedBox(height: 12),
+                            _HistoryItem(
+                              image: 'assets/images/gambar_produk.png',
+                              name: 'Nikon Z6 III',
+                              price: 'Rp 199.000/hari',
+                              date: 'Tanggal: 08/10/2025 - 12/10/2025',
+                            ),
+                          ],
+                        )
+                      : Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(24.0),
+                            child: Column(
+                              children: [
+                                Icon(
+                                  Icons.history,
+                                  size: 48,
+                                  color: Colors.grey.shade400,
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  'Belum ada riwayat peminjaman',
+                                  style: TextStyle(
+                                    color: Colors.grey.shade600,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                 ),
 
                 const SizedBox(height: 16),
@@ -215,24 +265,59 @@ class _ProfilePageState extends State<ProfilePage> {
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                 ),
                 const SizedBox(height: 8),
-                Row(
-                  children: const [
-                    Icon(Icons.star, color: Color(0xFFFFC107), size: 32),
-                    SizedBox(width: 8),
-                    Text(
-                      '4,0',
-                      style: TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.w700,
+                if (profileProvider.name == 'Mas Rusdi') ...[
+                  Row(
+                    children: const [
+                      Icon(Icons.star, color: Color(0xFFFFC107), size: 32),
+                      SizedBox(width: 8),
+                      Text(
+                        '4,0',
+                        style: TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  const Text(
+                    '123.456',
+                    style: TextStyle(color: Colors.black54),
+                  ),
+                  const SizedBox(height: 12),
+                  const _ReviewCard(),
+                ] else ...[
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24.0),
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.star_outline,
+                            size: 48,
+                            color: Colors.grey.shade400,
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            'Belum ada ulasan',
+                            style: TextStyle(
+                              color: Colors.grey.shade600,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            'Berikan ulasan setelah menyewa produk',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey.shade500,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                const Text('123.456', style: TextStyle(color: Colors.black54)),
-                const SizedBox(height: 12),
-
-                const _ReviewCard(),
+                  ),
+                ],
               ],
             ),
           ),

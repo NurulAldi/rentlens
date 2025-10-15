@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'models/user.dart';
+import 'services/user_service.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -8,22 +8,6 @@ class RegisterPage extends StatefulWidget {
   State<RegisterPage> createState() => _RegisterPageState();
 }
 
-// Simulasi database user sederhana (global agar bisa diakses dari file lain)
-final List<User> users = [
-  User(
-    username: 'peminjam1',
-    email: 'peminjam1@email.com',
-    password: 'password123',
-    role: 'Peminjam',
-  ),
-  User(
-    username: 'pemilik1',
-    email: 'pemilik1@email.com',
-    password: 'password123',
-    role: 'Pemilik',
-  ),
-];
-
 class _RegisterPageState extends State<RegisterPage> {
   bool isBorrower = true; // true = Peminjam, false = Pemilik
   final _formKey = GlobalKey<FormState>();
@@ -31,6 +15,7 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _obscure = true;
+  final _userService = UserService();
 
   @override
   void dispose() {
@@ -46,27 +31,28 @@ class _RegisterPageState extends State<RegisterPage> {
     final password = _passwordController.text;
     final role = isBorrower ? 'Peminjam' : 'Pemilik';
 
-    if (username.isEmpty || email.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Semua field harus diisi!')));
-      return;
-    }
-
-    // Simpan user baru ke "database"
-    users.add(
-      User(username: username, email: email, password: password, role: role),
+    final (success, message) = _userService.register(
+      username: username,
+      email: email,
+      password: password,
+      role: role,
     );
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('Akun $role berhasil dibuat!')));
-    _usernameController.clear();
-    _emailController.clear();
-    _passwordController.clear();
-    setState(() {
-      isBorrower = true;
-    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: success ? Colors.green : Colors.red,
+      ),
+    );
+
+    if (success) {
+      _usernameController.clear();
+      _emailController.clear();
+      _passwordController.clear();
+      setState(() {
+        isBorrower = true;
+      });
+    }
   }
 
   @override

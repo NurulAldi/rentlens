@@ -30,7 +30,20 @@ class _NotificationPageState extends State<NotificationPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   DrawerMenu activeDrawerMenu = DrawerMenu.notifikasi;
 
-  List<NotificationItem> get _items => widget.items ?? _demoItems;
+  // Check if current user is test account (pemilik1 or peminjam1)
+  bool get _isTestAccount =>
+      Session.username == 'pemilik1' || Session.username == 'peminjam1';
+
+  List<NotificationItem> get _items {
+    // If widget has custom items, use them
+    if (widget.items != null) return widget.items!;
+
+    // Show demo data only for test accounts
+    if (_isTestAccount) return _demoItems;
+
+    // For new users, return empty list
+    return [];
+  }
 
   // Demo data to show non-empty state
   static const _demoItems = <NotificationItem>[
@@ -67,29 +80,75 @@ class _NotificationPageState extends State<NotificationPage> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: const Text('Notifikasi', style: TextStyle(color: Colors.black)),
-        iconTheme: const IconThemeData(color: Colors.black),
+        leading: IconButton(
+          onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+          icon: SvgPicture.asset(
+            'assets/images/sidebar_ham.svg',
+            width: 24,
+            height: 24,
+          ),
+        ),
+        actions: [
+          IconButton(
+            onPressed: () {},
+            icon: SvgPicture.asset(
+              'assets/images/searchbar.svg',
+              width: 24,
+              height: 24,
+            ),
+          ),
+        ],
       ),
-      body: ListView.separated(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-        itemBuilder: (context, index) {
-          if (index == _items.length) {
-            return const Padding(
-              padding: EdgeInsets.only(top: 8),
-              child: Center(
-                child: Text(
-                  'Semua notifikasi telah ditampilkan!',
-                  style: TextStyle(color: Colors.black54),
+      body: _items.isEmpty
+          ? Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      'assets/images/no_notif.png',
+                      width: 150,
+                      height: 150,
+                    ),
+                    const SizedBox(height: 24),
+                    const Text(
+                      'Belum ada notifikasi',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Notifikasi akan muncul di sini',
+                      style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                    ),
+                  ],
                 ),
               ),
-            );
-          }
-          final n = _items[index];
-          return _NotifCard(item: n);
-        },
-        separatorBuilder: (_, __) => const SizedBox(height: 12),
-        itemCount: _items.length + 1, // +1 for footer text
-      ),
+            )
+          : ListView.separated(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+              itemBuilder: (context, index) {
+                if (index == _items.length) {
+                  return const Padding(
+                    padding: EdgeInsets.only(top: 8),
+                    child: Center(
+                      child: Text(
+                        'Semua notifikasi telah ditampilkan!',
+                        style: TextStyle(color: Colors.black54),
+                      ),
+                    ),
+                  );
+                }
+                final n = _items[index];
+                return _NotifCard(item: n);
+              },
+              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              itemCount: _items.length + 1, // +1 for footer text
+            ),
     );
   }
 }
