@@ -3,6 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../widgets/app_drawer.dart';
+import '../utils/drawer_navigator.dart';
+import '../models/session.dart';
 
 // ...existing code from original notification_page.dart...
 class NotificationItem {
@@ -59,17 +61,8 @@ class _NotificationPageState extends State<NotificationPage> {
       drawerScrimColor: Colors.black.withOpacity(0.4),
       drawer: AppDrawer(
         activeMenu: activeDrawerMenu,
-        onMenuTap: (menu) {
-          setState(() => activeDrawerMenu = menu);
-          if (menu == DrawerMenu.home) {
-            Navigator.pushReplacementNamed(context, '/home');
-          } else if (menu == DrawerMenu.profil) {
-            Navigator.pushReplacementNamed(context, '/profile');
-          } else if (menu == DrawerMenu.logout) {
-            Navigator.pushNamedAndRemoveUntil(context, '/login', (_) => false);
-          }
-          // Tambahkan navigasi lain sesuai kebutuhan
-        },
+        role: Session.isPemilik ? 'pemilik' : 'peminjam',
+        onMenuTap: (m) => DrawerNavigator.go(context, m),
       ),
       appBar: AppBar(
         backgroundColor: Colors.transparent,

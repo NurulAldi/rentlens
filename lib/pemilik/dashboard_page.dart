@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import 'pemilik_drawer.dart';
+import '../widgets/app_drawer.dart';
+import '../utils/drawer_navigator.dart';
 import '../models/product.dart';
 import 'product_form_page.dart';
 
@@ -15,7 +16,7 @@ class PemilikDashboardPage extends StatefulWidget {
 
 class _PemilikDashboardPageState extends State<PemilikDashboardPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  PemilikDrawerMenu _activeMenu = PemilikDrawerMenu.dashboard;
+  DrawerMenu _activeMenu = DrawerMenu.dashboard;
 
   // Dummy data for statistics
   int pendapatanBulanIni = 3250000; // rupiah
@@ -42,33 +43,16 @@ class _PemilikDashboardPageState extends State<PemilikDashboardPage> {
     ),
   ];
 
-  void _navigateMenu(PemilikDrawerMenu m) {
-    setState(() => _activeMenu = m);
-    switch (m) {
-      case PemilikDrawerMenu.dashboard:
-        // already here
-        break;
-      case PemilikDrawerMenu.produk:
-        Navigator.pushReplacementNamed(context, '/pemilik/produk');
-        break;
-      case PemilikDrawerMenu.notifikasi:
-        Navigator.pushReplacementNamed(context, '/notifications');
-        break;
-      case PemilikDrawerMenu.profil:
-        Navigator.pushReplacementNamed(context, '/profile');
-        break;
-      case PemilikDrawerMenu.logout:
-        // handled inside drawer
-        break;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: Colors.grey[100],
-      drawer: PemilikDrawer(activeMenu: _activeMenu, onMenuTap: _navigateMenu),
+      drawer: AppDrawer(
+        role: 'pemilik',
+        activeMenu: _activeMenu,
+        onMenuTap: (m) => DrawerNavigator.go(context, m),
+      ),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,

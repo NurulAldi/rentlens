@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
 import '../models/product.dart';
-import '../peminjam/product_detail_page.dart';
+import '../pages/product_detail_page.dart';
 import '../widgets/app_drawer.dart';
+import '../utils/drawer_navigator.dart';
+import '../widgets/product_image_widget.dart';
+import '../models/session.dart';
+import '../providers/product_provider.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -18,152 +23,144 @@ class _HomePageState extends State<HomePage> {
     'Kamera',
     'Lensa',
     'Tripod',
-    'Aksesoris',
+    'Lighting',
   ];
   int selectedIndex = 0;
   DrawerMenu activeDrawerMenu = DrawerMenu.home;
 
-  // Dummy products per category (using same image placeholder)
-  List<Product> get products {
-    final img = 'assets/images/gambar_produk.png';
-    if (selectedIndex == 1 || selectedIndex == 0) {
-      return List.generate(
-        6,
-        (i) => Product(
-          id: 'p$i',
-          name: 'Nikon D5600',
-          imageAsset: img,
-          pricePerDay: 199000,
-          rating: 4.0,
-          owner: 'Mas Amba',
-        ),
-      );
-    }
-    // Other categories: return empty to show empty state
-    return [];
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: _scaffoldKey,
-      backgroundColor: Colors.grey[100],
-      drawerScrimColor: Colors.black.withOpacity(0.4),
-      drawer: AppDrawer(
-        activeMenu: activeDrawerMenu,
-        onMenuTap: (menu) {
-          setState(() => activeDrawerMenu = menu);
-          if (menu == DrawerMenu.notifikasi) {
-            Navigator.pushReplacementNamed(context, '/notifications');
-          } else if (menu == DrawerMenu.profil) {
-            Navigator.pushReplacementNamed(context, '/profile');
-          } else if (menu == DrawerMenu.logout) {
-            Navigator.pushNamedAndRemoveUntil(context, '/login', (_) => false);
-          }
-          // Tambahkan navigasi lain sesuai kebutuhan
-        },
-      ),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          onPressed: () => _scaffoldKey.currentState?.openDrawer(),
-          icon: SvgPicture.asset(
-            'assets/images/sidebar_ham.svg',
-            width: 24,
-            height: 24,
+    return Consumer<ProductProvider>(
+      builder: (context, productProvider, child) {
+        // Get products based on selected category
+        final products = selectedIndex == 0
+            ? productProvider.availableProducts
+            : productProvider.getProductsByCategory(categories[selectedIndex]);
+
+        return Scaffold(
+          key: _scaffoldKey,
+          backgroundColor: Colors.grey[100],
+          drawerScrimColor: Colors.black.withOpacity(0.4),
+          drawer: AppDrawer(
+            activeMenu: activeDrawerMenu,
+            role: Session.isPemilik ? 'pemilik' : 'peminjam',
+            onMenuTap: (m) => DrawerNavigator.go(context, m),
           ),
-        ),
-        actions: [
-          IconButton(
-            onPressed: () {},
-            icon: SvgPicture.asset(
-              'assets/images/searchbar.svg',
-              width: 24,
-              height: 24,
-            ),
-          ),
-        ],
-      ),
-      body: CustomScrollView(
-        slivers: [
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Kategori',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    height: 40,
-                    child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      itemBuilder: (context, index) {
-                        final active = index == selectedIndex;
-                        return GestureDetector(
-                          onTap: () => setState(() => selectedIndex = index),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 10,
-                            ),
-                            decoration: BoxDecoration(
-                              color: active
-                                  ? Colors.black
-                                  : Colors.grey.shade300,
-                              borderRadius: BorderRadius.circular(18),
-                            ),
-                            child: Text(
-                              categories[index],
-                              style: TextStyle(
-                                color: active ? Colors.white : Colors.black,
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                      separatorBuilder: (_, __) => const SizedBox(width: 12),
-                      itemCount: categories.length,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                ],
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            leading: IconButton(
+              onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+              icon: SvgPicture.asset(
+                'assets/images/sidebar_ham.svg',
+                width: 24,
+                height: 24,
               ),
             ),
-          ),
-          if (products.isEmpty)
-            SliverFillRemaining(hasScrollBody: false, child: _EmptyProducts())
-          else
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              sliver: SliverGrid(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                  childAspectRatio: 0.78,
+            actions: [
+              IconButton(
+                onPressed: () {},
+                icon: SvgPicture.asset(
+                  'assets/images/searchbar.svg',
+                  width: 24,
+                  height: 24,
                 ),
-                delegate: SliverChildBuilderDelegate((context, index) {
-                  final p = products[index];
-                  return _ProductCard(
-                    product: p,
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => ProductDetailPage(product: p),
-                      ),
-                    ),
-                  );
-                }, childCount: products.length),
               ),
-            ),
-        ],
-      ),
+            ],
+          ),
+          body: CustomScrollView(
+            slivers: [
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Kategori',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        height: 40,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          itemBuilder: (context, index) {
+                            final active = index == selectedIndex;
+                            return GestureDetector(
+                              onTap: () =>
+                                  setState(() => selectedIndex = index),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 10,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: active
+                                      ? Colors.black
+                                      : Colors.grey.shade300,
+                                  borderRadius: BorderRadius.circular(18),
+                                ),
+                                child: Text(
+                                  categories[index],
+                                  style: TextStyle(
+                                    color: active ? Colors.white : Colors.black,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(width: 12),
+                          itemCount: categories.length,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                  ),
+                ),
+              ),
+              if (products.isEmpty)
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: _EmptyProducts(),
+                )
+              else
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  sliver: SliverGrid(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 12,
+                          childAspectRatio: 0.78,
+                        ),
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      final p = products[index];
+                      return _ProductCard(
+                        product: p,
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => ProductDetailPage(product: p),
+                          ),
+                        ),
+                      );
+                    }, childCount: products.length),
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
@@ -200,7 +197,10 @@ class _ProductCard extends StatelessWidget {
               ),
               child: AspectRatio(
                 aspectRatio: 16 / 9,
-                child: Image.asset(product.imageAsset, fit: BoxFit.cover),
+                child: ProductImageWidget(
+                  imagePath: product.imageAsset,
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
             const SizedBox(height: 8),

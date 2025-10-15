@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'models/user.dart';
+import 'models/session.dart';
 import 'register_page.dart';
 
 class LoginPage extends StatefulWidget {
@@ -41,8 +41,10 @@ class _LoginPageState extends State<LoginPage> {
         (u) => u.email == email && u.password == password && u.role == role,
       );
       if (role == 'Pemilik') {
+        Session.login(UserRole.pemilik);
         Navigator.pushReplacementNamed(context, '/pemilik/produk');
       } else {
+        Session.login(UserRole.peminjam);
         Navigator.pushReplacementNamed(context, '/home');
       }
     } catch (e) {

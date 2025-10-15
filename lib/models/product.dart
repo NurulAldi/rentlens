@@ -6,6 +6,8 @@ class Product {
   final double rating;
   final String owner;
   final String description;
+  final String? category;
+  final bool isBooked;
 
   const Product({
     required this.id,
@@ -15,5 +17,7 @@ class Product {
     required this.rating,
     required this.owner,
     this.description = 'Barang ini adalah lorem ipsum dolores',
+    this.category,
+    this.isBooked = false,
   });
 }

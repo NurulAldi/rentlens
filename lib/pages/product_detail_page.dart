@@ -1,10 +1,8 @@
-// Pindahan dari lib/product_detail_page.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../models/product.dart';
-
-// ...existing code from original product_detail_page.dart...
+import '../models/session.dart';
+import '../widgets/product_image_widget.dart';
 
 class ProductDetailPage extends StatefulWidget {
   const ProductDetailPage({super.key, required this.product});
@@ -55,7 +53,10 @@ class _ProductDetailPageState extends State<ProductDetailPage>
               background: Stack(
                 fit: StackFit.expand,
                 children: [
-                  Image.asset(product.imageAsset, fit: BoxFit.cover),
+                  ProductImageWidget(
+                    imagePath: product.imageAsset,
+                    fit: BoxFit.cover,
+                  ),
                   Container(color: Colors.black26),
                 ],
               ),
@@ -143,66 +144,71 @@ class _ProductDetailPageState extends State<ProductDetailPage>
           const SliverToBoxAdapter(child: SizedBox(height: 80)),
         ],
       ),
-      bottomNavigationBar: SafeArea(
-        top: false,
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x14000000),
-                blurRadius: 10,
-                offset: Offset(0, -2),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Text(
-                      'Harga',
-                      style: TextStyle(color: Colors.black54),
+      // BottomNavigationBar hanya ditampilkan untuk peminjam
+      bottomNavigationBar: Session.isPeminjam
+          ? SafeArea(
+              top: false,
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0x14000000),
+                      blurRadius: 10,
+                      offset: Offset(0, -2),
                     ),
-                    Text(
-                      'Rp ${product.pricePerDay.toStringAsFixed(0)}/hari',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 18,
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Text(
+                            'Harga',
+                            style: TextStyle(color: Colors.black54),
+                          ),
+                          Text(
+                            'Rp ${product.pricePerDay.toStringAsFixed(0)}/hari',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w800,
+                              fontSize: 18,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(
+                      height: 48,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF5C62F6),
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          elevation: 6,
+                        ),
+                        onPressed: () {
+                          // TODO: Implement rental confirmation
+                        },
+                        child: const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 20),
+                          child: Text(
+                            'Rental',
+                            style: TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
-              SizedBox(
-                height: 48,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF5C62F6),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-                    elevation: 6,
-                  ),
-                  onPressed: () {},
-                  child: const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20),
-                    child: Text(
-                      'Rental',
-                      style: TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+            )
+          : null, // Tidak ada bottom bar untuk pemilik
     );
   }
 }
