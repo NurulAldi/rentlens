@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../models/product.dart';
 import '../models/session.dart';
+import '../widgets/product_image_widget.dart';
 
 class ProductDetailPage extends StatefulWidget {
   const ProductDetailPage({super.key, required this.product});
@@ -52,7 +53,10 @@ class _ProductDetailPageState extends State<ProductDetailPage>
               background: Stack(
                 fit: StackFit.expand,
                 children: [
-                  Image.asset(product.imageAsset, fit: BoxFit.cover),
+                  ProductImageWidget(
+                    imagePath: product.imageAsset,
+                    fit: BoxFit.cover,
+                  ),
                   Container(color: Colors.black26),
                 ],
               ),

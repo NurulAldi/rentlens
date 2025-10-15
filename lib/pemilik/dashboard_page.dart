@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import 'pemilik_drawer.dart';
+import '../widgets/app_drawer.dart';
 import '../models/product.dart';
 import 'product_form_page.dart';
 
@@ -15,7 +15,7 @@ class PemilikDashboardPage extends StatefulWidget {
 
 class _PemilikDashboardPageState extends State<PemilikDashboardPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  PemilikDrawerMenu _activeMenu = PemilikDrawerMenu.dashboard;
+  DrawerMenu _activeMenu = DrawerMenu.dashboard;
 
   // Dummy data for statistics
   int pendapatanBulanIni = 3250000; // rupiah
@@ -42,23 +42,26 @@ class _PemilikDashboardPageState extends State<PemilikDashboardPage> {
     ),
   ];
 
-  void _navigateMenu(PemilikDrawerMenu m) {
+  void _navigateMenu(DrawerMenu m) {
     setState(() => _activeMenu = m);
     switch (m) {
-      case PemilikDrawerMenu.dashboard:
+      case DrawerMenu.dashboard:
         // already here
         break;
-      case PemilikDrawerMenu.produk:
+      case DrawerMenu.produk:
         Navigator.pushReplacementNamed(context, '/pemilik/produk');
         break;
-      case PemilikDrawerMenu.notifikasi:
+      case DrawerMenu.notifikasi:
         Navigator.pushReplacementNamed(context, '/notifications');
         break;
-      case PemilikDrawerMenu.profil:
+      case DrawerMenu.profil:
         Navigator.pushReplacementNamed(context, '/profile');
         break;
-      case PemilikDrawerMenu.logout:
+      case DrawerMenu.logout:
         // handled inside drawer
+        break;
+      case DrawerMenu.home:
+        // not applicable for pemilik
         break;
     }
   }
@@ -68,7 +71,11 @@ class _PemilikDashboardPageState extends State<PemilikDashboardPage> {
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: Colors.grey[100],
-      drawer: PemilikDrawer(activeMenu: _activeMenu, onMenuTap: _navigateMenu),
+      drawer: AppDrawer(
+        role: 'pemilik',
+        activeMenu: _activeMenu,
+        onMenuTap: _navigateMenu,
+      ),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,

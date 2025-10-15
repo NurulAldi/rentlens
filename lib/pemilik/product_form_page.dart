@@ -6,6 +6,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../models/product.dart';
+import '../utils/image_storage_helper.dart';
 
 /// A single page that adapts for both Add and Edit Product flows.
 /// - If [initialProduct] is null: Add mode.
@@ -36,6 +37,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
 
   final ImagePicker _picker = ImagePicker();
   File? _pickedImageFile;
+  bool _isLoading = false;
 
   bool get _isEdit => widget.initialProduct != null;
 
@@ -78,30 +80,60 @@ class _ProductFormPageState extends State<ProductFormPage> {
     return parts.isNotEmpty ? parts.last : path;
   }
 
-  void _submit() {
-    // For now we just pop with a filled Product object (id synthesized)
+  Future<void> _submit() async {
+    // Validate form
     if (!_formKey.currentState!.validate()) return;
 
-    final product = Product(
-      id:
-          widget.initialProduct?.id ??
-          DateTime.now().millisecondsSinceEpoch.toString(),
-      name: _titleCtrl.text.trim(),
-      imageAsset:
-          _pickedImageFile?.path ?? widget.initialProduct?.imageAsset ?? '',
-      pricePerDay:
-          double.tryParse(
-            _priceCtrl.text.replaceAll('.', '').replaceAll(',', ''),
-          ) ??
-          0,
-      rating: widget.initialProduct?.rating ?? 0,
-      owner: widget.initialProduct?.owner ?? 'Mas Amba',
-      description: _descCtrl.text.trim(),
-      category: _selectedCategory,
-      isBooked: widget.initialProduct?.isBooked ?? false,
-    );
+    setState(() => _isLoading = true);
 
-    Navigator.pop(context, product);
+    try {
+      String imagePath;
+
+      // Jika ada gambar baru yang dipilih, simpan ke storage
+      if (_pickedImageFile != null) {
+        imagePath = await ImageStorageHelper.saveImage(_pickedImageFile!);
+      } else {
+        // Gunakan gambar existing atau default
+        imagePath =
+            widget.initialProduct?.imageAsset ??
+            'assets/images/gambar_produk.png';
+      }
+
+      final product = Product(
+        id:
+            widget.initialProduct?.id ??
+            DateTime.now().millisecondsSinceEpoch.toString(),
+        name: _titleCtrl.text.trim(),
+        imageAsset: imagePath,
+        pricePerDay:
+            double.tryParse(
+              _priceCtrl.text.replaceAll('.', '').replaceAll(',', ''),
+            ) ??
+            0,
+        rating: widget.initialProduct?.rating ?? 0,
+        owner: widget.initialProduct?.owner ?? 'Mas Amba',
+        description: _descCtrl.text.trim(),
+        category: _selectedCategory,
+        isBooked: widget.initialProduct?.isBooked ?? false,
+      );
+
+      if (!mounted) return;
+      Navigator.pop(context, product);
+    } catch (e) {
+      if (!mounted) return;
+
+      // Tampilkan error message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Gagal menyimpan gambar: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   @override
@@ -211,8 +243,19 @@ class _ProductFormPageState extends State<ProductFormPage> {
                       vertical: 12,
                     ),
                   ),
-                  onPressed: _submit,
-                  child: Text(_isEdit ? 'Edit' : 'Tambah'),
+                  onPressed: _isLoading ? null : _submit,
+                  child: _isLoading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
+                          ),
+                        )
+                      : Text(_isEdit ? 'Edit' : 'Tambah'),
                 ),
               ),
             ],

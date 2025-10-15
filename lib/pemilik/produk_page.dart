@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../models/product.dart';
 import '../widgets/app_drawer.dart';
+import '../widgets/product_image_widget.dart';
 import '../providers/product_provider.dart';
 import 'product_form_page.dart';
 
@@ -391,8 +392,8 @@ class _ProdukList extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                   child: Opacity(
                     opacity: disabled ? 0.4 : 1,
-                    child: Image.asset(
-                      p.imageAsset,
+                    child: ProductImageWidget(
+                      imagePath: p.imageAsset,
                       width: 64,
                       height: 40,
                       fit: BoxFit.cover,

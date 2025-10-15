@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import '../widgets/app_drawer.dart';
+import '../widgets/product_image_widget.dart';
 import '../pages/product_detail_page.dart';
 import '../providers/product_provider.dart';
 
@@ -434,8 +435,8 @@ class _StoreTab extends StatelessWidget {
                               ),
                               child: AspectRatio(
                                 aspectRatio: 16 / 9,
-                                child: Image.asset(
-                                  product.imageAsset,
+                                child: ProductImageWidget(
+                                  imagePath: product.imageAsset,
                                   fit: BoxFit.cover,
                                 ),
                               ),

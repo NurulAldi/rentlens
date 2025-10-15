@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../models/product.dart';
 import '../pages/product_detail_page.dart';
 import '../widgets/app_drawer.dart';
+import '../widgets/product_image_widget.dart';
 import '../models/session.dart';
 import '../providers/product_provider.dart';
 
@@ -229,7 +230,10 @@ class _ProductCard extends StatelessWidget {
               ),
               child: AspectRatio(
                 aspectRatio: 16 / 9,
-                child: Image.asset(product.imageAsset, fit: BoxFit.cover),
+                child: ProductImageWidget(
+                  imagePath: product.imageAsset,
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
             const SizedBox(height: 8),
