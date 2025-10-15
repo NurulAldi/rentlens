@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
 import '../models/product.dart';
+import '../models/booking_request.dart';
+import '../providers/booking_provider.dart';
 import 'booking_success_page.dart';
 
 class BookingPage extends StatefulWidget {
@@ -12,8 +15,8 @@ class BookingPage extends StatefulWidget {
 }
 
 class _BookingPageState extends State<BookingPage> {
-  DateTime? _startDate;
-  DateTime? _endDate;
+  DateTime? _startDate = DateTime.now();
+  DateTime? _endDate = DateTime.now();
   String _selectedPaymentMethod = 'Dana';
   String _selectedDeliveryMethod = 'Ambil langsung di lokasi pemilik';
 
@@ -127,6 +130,31 @@ class _BookingPageState extends State<BookingPage> {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () {
+                        // Simpan booking ke provider
+                        final bookingProvider = Provider.of<BookingProvider>(
+                          context,
+                          listen: false,
+                        );
+
+                        final booking = BookingRequest(
+                          id: 'br_${DateTime.now().millisecondsSinceEpoch}',
+                          productId: widget.product.id,
+                          productName: widget.product.name,
+                          borrowerName:
+                              'Current User', // TODO: Ambil dari user yang login
+                          borrowerPhone:
+                              '081234567890', // TODO: Ambil dari user yang login
+                          startDate: _startDate!,
+                          endDate: _endDate!,
+                          totalPrice: _calculateTotal(),
+                          paymentMethod: _selectedPaymentMethod,
+                          deliveryMethod: _selectedDeliveryMethod,
+                          requestDate: DateTime.now(),
+                          status: 'pending',
+                        );
+
+                        bookingProvider.addBookingRequest(booking);
+
                         Navigator.pop(context);
                         Navigator.pushReplacement(
                           context,
@@ -478,7 +506,8 @@ class _BookingPageState extends State<BookingPage> {
                   const SizedBox(height: 12),
                   _buildPaymentOption('Dana', 'assets/images/Dana.png', true),
                   _buildPaymentOption('Gopay', 'assets/images/Gopay.png', true),
-                  _buildPaymentOption('Ovo', 'assets/images/Ovo.svg', false),
+                  _buildPaymentOption('Ovo', 'assets/images/Ovo.png', true),
+                  _buildPaymentOption('Tunai', 'assets/images/uang.svg', false),
                 ],
               ),
             ),

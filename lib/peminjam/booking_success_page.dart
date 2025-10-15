@@ -53,7 +53,7 @@ class _BookingSuccessPageState extends State<BookingSuccessPage> {
             ),
             const SizedBox(height: 32),
             const Text(
-              'Pesanan telah dibuat !',
+              'Pengajuan booking telah berhasil!',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
             ),
           ],

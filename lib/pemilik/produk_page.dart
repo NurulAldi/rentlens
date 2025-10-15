@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../models/product.dart';
 import 'pemilik_drawer.dart';
 import 'product_form_page.dart';
+import 'peminjam_list_page.dart';
 
 class PemilikProdukPage extends StatefulWidget {
   const PemilikProdukPage({super.key});
@@ -427,6 +428,32 @@ class _ProdukList extends StatelessWidget {
                     ],
                   ),
                 ),
+                // Icon untuk melihat list peminjam
+                IconButton(
+                  onPressed: disabled
+                      ? null
+                      : () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => PeminjamListPage(
+                                productName: p.name,
+                                productId: p.id,
+                              ),
+                            ),
+                          );
+                        },
+                  icon: SvgPicture.asset(
+                    'assets/images/users.svg',
+                    width: 20,
+                    height: 20,
+                    colorFilter: ColorFilter.mode(
+                      disabled ? Colors.black26 : const Color(0xFF5C62F6),
+                      BlendMode.srcIn,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 4),
                 IconButton(
                   onPressed: disabled ? null : () => onEdit(p),
                   icon: SvgPicture.asset(
